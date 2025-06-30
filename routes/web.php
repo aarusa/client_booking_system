@@ -7,6 +7,8 @@ use App\Http\Controllers\CMS\DashboardController;
 use App\Http\Controllers\CMS\UserController;
 use App\Http\Controllers\CMS\RoleController;
 use App\Http\Controllers\CMS\PermissionController;
+use App\Http\Controllers\CMS\ClientController;
+use App\Http\Controllers\CMS\AppointmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,7 +79,32 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy')->middleware('permission:delete role');
     });
 
+    Route::prefix('clients')->name('clients.')->middleware('auth')->group(function () {
+        Route::get('/', [ClientController::class, 'index'])->name('index')->middleware('permission:view client');
+        Route::get('/create', [ClientController::class, 'create'])->name('create')->middleware('permission:add client');
+        Route::post('/', [ClientController::class, 'store'])->name('store')->middleware('permission:add client');
+        Route::get('/{client}', [ClientController::class, 'show'])->name('show')->middleware('permission:view client');
+        Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit')->middleware('permission:edit client');
+        Route::put('/{client}', [ClientController::class, 'update'])->name('update')->middleware('permission:edit client');
+        Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy')->middleware('permission:delete client');
+    });
+
     // Other authenticated user routes
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+
+    // Appointment Management
+    Route::middleware(['auth', 'can:appointment-access'])->prefix('appointments')->name('appointments.')->group(function () {
+        Route::get('/', [AppointmentController::class, 'index'])->name('index');
+        Route::get('/create', [AppointmentController::class, 'create'])->name('create');
+        Route::post('/', [AppointmentController::class, 'store'])->name('store');
+        Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('show');
+        Route::get('/{appointment}/edit', [AppointmentController::class, 'edit'])->name('edit');
+        Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('update');
+        Route::delete('/{appointment}', [AppointmentController::class, 'destroy'])->name('destroy');
+        // AJAX: Get dogs for a client
+        Route::get('/client/{client}/dogs', [AppointmentController::class, 'getClientDogs'])->name('client.dogs');
+        // Status update
+        Route::patch('/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('update-status');
+    });
 });

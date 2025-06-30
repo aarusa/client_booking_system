@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('gender', ['male', 'female'])->nullable();
             $table->string('photo')->nullable();
             $table->decimal('weight', 5, 2)->nullable()->comment('Weight in pounds');
-            $table->enum('coat_type', ['short', 'medium', 'long', 'curly', 'wire'])->nullable();            
+            $table->string('coat_type')->nullable();            
             $table->enum('spayed_neutered', ['yes', 'no', 'unknown'])->nullable();
             $table->string('behavior')->nullable();
             $table->text('tags')->nullable();

@@ -101,6 +101,62 @@
             </div>
         </li>
         @endcanany
+        {{-- Clients --}}
+        @canany(['view client', 'add client', 'edit client', 'delete client'])
+        <li class="nav-item {{ request()->is('clients*') ? 'active' : '' }}">
+            <a data-bs-toggle="collapse" href="#clients" aria-expanded="{{ request()->is('clients*') ? 'true' : 'false' }}">
+                <i class="fas fa-users"></i>
+                <p>Clients & Dogs</p>
+                <span class="caret"></span>
+            </a>
+            <div class="collapse {{ request()->is('clients*') ? 'show' : '' }}" id="clients">
+                <ul class="nav nav-collapse">
+                    @can('view client')
+                    <li class="{{ request()->routeIs('clients.index') ? 'active' : '' }}">
+                        <a href="{{ route('clients.index') }}">
+                        <span class="sub-item">View Clients</span>
+                        </a>
+                    </li>
+                    @endcan
+                    @can('add client')
+                    <li class="{{ request()->routeIs('clients.create') ? 'active' : '' }}">
+                        <a href="{{ route('clients.create') }}">
+                        <span class="sub-item">Add Client & Dogs</span>
+                        </a>
+                    </li>
+                    @endcan
+                </ul>
+            </div>
+        </li>
+        @endcanany
+        {{-- Appointments --}}
+        @canany(['appointment-access', 'appointment-create', 'appointment-view', 'appointment-edit', 'appointment-delete'])
+        <li class="nav-item {{ request()->is('appointments*') ? 'active' : '' }}">
+            <a data-bs-toggle="collapse" href="#appointments" aria-expanded="{{ request()->is('appointments*') ? 'true' : 'false' }}">
+                <i class="fas fa-calendar-check"></i>
+                <p>Appointments</p>
+                <span class="caret"></span>
+            </a>
+            <div class="collapse {{ request()->is('appointments*') ? 'show' : '' }}" id="appointments">
+                <ul class="nav nav-collapse">
+                    @can('appointment-view')
+                    <li class="{{ request()->routeIs('appointments.index') ? 'active' : '' }}">
+                        <a href="{{ route('appointments.index') }}">
+                            <span class="sub-item">View Appointments</span>
+                        </a>
+                    </li>
+                    @endcan
+                    @can('appointment-create')
+                    <li class="{{ request()->routeIs('appointments.create') ? 'active' : '' }}">
+                        <a href="{{ route('appointments.create') }}">
+                            <span class="sub-item">Add Appointment</span>
+                        </a>
+                    </li>
+                    @endcan
+                </ul>
+            </div>
+        </li>
+        @endcanany
         {{-- Settings --}}
         {{-- <li class="nav-item">
             <a data-bs-toggle="collapse" href="#settings">

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->time('end_time');
             $table->enum('status', ['scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled'])->default('scheduled');
             $table->decimal('total_price', 8, 2)->default(0.00);
+            $table->json('services_data')->nullable();
             $table->foreignId('subscription_id')->nullable()->constrained('subscriptions')->onDelete('set null');
             $table->text('notes')->nullable();
             $table->timestamps();

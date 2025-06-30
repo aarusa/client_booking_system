@@ -37,13 +37,44 @@ class RolePermissionSeeder extends Seeder
         Permission::create(['name' => 'edit permission']);
         Permission::create(['name' => 'delete permission']);
         Permission::create(['name' => 'manage permission']);
-        
+
+        // Client permissions (now include dog management)
+        Permission::create(['name' => 'view client']);
+        Permission::create(['name' => 'add client']);
+        Permission::create(['name' => 'edit client']);
+        Permission::create(['name' => 'delete client']);
+
+        // Appointment Permissions
+        $appointmentPermissions = [
+            'appointment-access',
+            'appointment-create',
+            'appointment-view',
+            'appointment-edit',
+            'appointment-delete',
+        ];
+        foreach ($appointmentPermissions as $perm) {
+            Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
+        }
 
         // Give all permissions to Super Admin
         $roleSuperAdmin->givePermissionTo(Permission::all());
 
         // Admin and User permissions as before
-        $roleAdmin->givePermissionTo(['view dashboard', 'view users', 'add user', 'edit user', 'delete user', 'view roles', 'add role', 'edit role', 'delete role', 'view permissions', 'manage permission']);
-        $roleUser->givePermissionTo('view dashboard', 'view users');
+        $roleAdmin->givePermissionTo(['view dashboard', 'view users', 'add user', 'edit user', 'delete user', 'view roles', 'add role', 'edit role', 'delete role', 'view permissions', 'manage permission', 'view client', 'add client', 'edit client', 'delete client']);
+        $roleUser->givePermissionTo('view dashboard', 'view users', 'view client');
+
+        // Assign appointment permissions
+        $roleSuperAdmin->givePermissionTo($appointmentPermissions);
+        $roleAdmin->givePermissionTo([
+            'appointment-access',
+            'appointment-create',
+            'appointment-view',
+            'appointment-edit',
+            'appointment-delete',
+        ]);
+        $roleUser->givePermissionTo([
+            'appointment-access',
+            'appointment-view',
+        ]);
     }
 }
