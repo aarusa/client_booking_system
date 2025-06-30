@@ -121,7 +121,7 @@
                     @can('add client')
                     <li class="{{ request()->routeIs('clients.create') ? 'active' : '' }}">
                         <a href="{{ route('clients.create') }}">
-                        <span class="sub-item">Add Client & Dogs</span>
+                        <span class="sub-item">Add Client</span>
                         </a>
                     </li>
                     @endcan

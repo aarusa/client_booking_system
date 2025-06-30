@@ -17,9 +17,73 @@ class AppointmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with(['client', 'dog', 'services'])->orderBy('appointment_date', 'desc')->get();
+        $query = Appointment::with(['client', 'dog', 'services']);
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->where('appointment_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->where('appointment_date', '<=', $request->date_to);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Client search filter
+        if ($request->filled('client_search')) {
+            $searchTerm = $request->client_search;
+            $query->whereHas('client', function ($q) use ($searchTerm) {
+                $q->where('first_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('email', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Location search filter
+        if ($request->filled('location_search')) {
+            $searchTerm = $request->location_search;
+            $query->whereHas('client', function ($q) use ($searchTerm) {
+                $q->where('address', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('city', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('state', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('zipcode', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Sorting
+        switch ($request->get('sort', 'date_desc')) {
+            case 'date_asc':
+                $query->orderBy('appointment_date', 'asc')->orderBy('start_time', 'asc');
+                break;
+            case 'client_asc':
+                $query->join('clients', 'appointments.client_id', '=', 'clients.id')
+                      ->orderBy('clients.first_name', 'asc')
+                      ->orderBy('clients.last_name', 'asc')
+                      ->select('appointments.*');
+                break;
+            case 'client_desc':
+                $query->join('clients', 'appointments.client_id', '=', 'clients.id')
+                      ->orderBy('clients.first_name', 'desc')
+                      ->orderBy('clients.last_name', 'desc')
+                      ->select('appointments.*');
+                break;
+            case 'price_desc':
+                $query->orderBy('total_price', 'desc');
+                break;
+            case 'price_asc':
+                $query->orderBy('total_price', 'asc');
+                break;
+            default: // date_desc
+                $query->orderBy('appointment_date', 'desc')->orderBy('start_time', 'desc');
+                break;
+        }
+
+        $appointments = $query->paginate(10);
         
         return view('cms.modules.appointments.index', compact('appointments'));
     }

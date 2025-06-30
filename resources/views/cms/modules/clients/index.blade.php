@@ -24,6 +24,78 @@
         {{-- Client contents --}}
         <div class="row">
             <div class="col-md-12">
+                <!-- Filters and Sort Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Search & Filter</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('clients.index') }}" id="filterForm">
+                            <!-- Search Row -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="name_search" class="form-label">Search Name</label>
+                                    <input type="text" class="form-control" id="name_search" name="name_search" 
+                                           placeholder="First name, last name..." value="{{ request('name_search') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="email_search" class="form-label">Search Email</label>
+                                    <input type="text" class="form-control" id="email_search" name="email_search" 
+                                           placeholder="Email address..." value="{{ request('email_search') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="location_search" class="form-label">Search Location</label>
+                                    <input type="text" class="form-control" id="location_search" name="location_search" 
+                                           placeholder="City, state, or address..." value="{{ request('location_search') }}">
+                                </div>
+                            </div>
+
+                            <!-- Filter Row -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="dog_name_search" class="form-label">Search Dog Name</label>
+                                    <input type="text" class="form-control" id="dog_name_search" name="dog_name_search" 
+                                           placeholder="Dog name..." value="{{ request('dog_name_search') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="dog_breed_search" class="form-label">Search Dog Breed</label>
+                                    <input type="text" class="form-control" id="dog_breed_search" name="dog_breed_search" 
+                                           placeholder="Dog breed..." value="{{ request('dog_breed_search') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="sort" class="form-label">Sort By</label>
+                                    <select class="form-select" id="sort" name="sort">
+                                        <option value="created_desc" {{ request('sort', 'created_desc') == 'created_desc' ? 'selected' : '' }}>Newest First</option>
+                                        <option value="created_asc" {{ request('sort') == 'created_asc' ? 'selected' : '' }}>Oldest First</option>
+                                        <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Name (A-Z)</option>
+                                        <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Name (Z-A)</option>
+                                        <option value="email_asc" {{ request('sort') == 'email_asc' ? 'selected' : '' }}>Email (A-Z)</option>
+                                        <option value="email_desc" {{ request('sort') == 'email_desc' ? 'selected' : '' }}>Email (Z-A)</option>
+                                        <option value="dogs_desc" {{ request('sort') == 'dogs_desc' ? 'selected' : '' }}>Most Dogs First</option>
+                                        <option value="dogs_asc" {{ request('sort') == 'dogs_asc' ? 'selected' : '' }}>Least Dogs First</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 align-items-center">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                                <a href="{{ route('clients.index') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </a>
+                                @if(request()->hasAny(['name_search', 'email_search', 'location_search', 'dog_name_search', 'dog_breed_search', 'sort']))
+                                    <span class="badge bg-info">
+                                        {{ $clients->count() }} client(s) found
+                                    </span>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Clients Table -->
                 <div class="card">
                   <div class="card-header">
                     <div class="card-title">All Clients</div>
@@ -78,6 +150,16 @@
                         @endif
                       </tbody>
                     </table>
+                    
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted small">
+                            Showing {{ $clients->firstItem() ?? 0 }} to {{ $clients->lastItem() ?? 0 }} of {{ $clients->total() }} clients
+                        </div>
+                        <div>
+                            {{ $clients->appends(request()->query())->links('pagination::bootstrap-4') }}
+                        </div>
+                    </div>
                   </div>
                 </div>
             </div>

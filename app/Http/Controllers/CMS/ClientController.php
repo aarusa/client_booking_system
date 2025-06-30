@@ -14,9 +14,81 @@ class ClientController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clients = Client::with('dogs')->get();
+        $query = Client::with('dogs');
+
+        // Name search filter
+        if ($request->filled('name_search')) {
+            $searchTerm = $request->name_search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('first_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Email search filter
+        if ($request->filled('email_search')) {
+            $searchTerm = $request->email_search;
+            $query->where('email', 'LIKE', "%{$searchTerm}%");
+        }
+
+        // Location search filter
+        if ($request->filled('location_search')) {
+            $searchTerm = $request->location_search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('address', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('city', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('state', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('zipcode', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Dog name search filter
+        if ($request->filled('dog_name_search')) {
+            $searchTerm = $request->dog_name_search;
+            $query->whereHas('dogs', function ($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Dog breed search filter
+        if ($request->filled('dog_breed_search')) {
+            $searchTerm = $request->dog_breed_search;
+            $query->whereHas('dogs', function ($q) use ($searchTerm) {
+                $q->where('breed', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // Sorting
+        switch ($request->get('sort', 'name_asc')) {
+            case 'name_desc':
+                $query->orderBy('first_name', 'desc')->orderBy('last_name', 'desc');
+                break;
+            case 'email_asc':
+                $query->orderBy('email', 'asc');
+                break;
+            case 'email_desc':
+                $query->orderBy('email', 'desc');
+                break;
+            case 'dogs_desc':
+                $query->withCount('dogs')->orderBy('dogs_count', 'desc');
+                break;
+            case 'dogs_asc':
+                $query->withCount('dogs')->orderBy('dogs_count', 'asc');
+                break;
+            case 'created_desc':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'created_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            default: // name_asc
+                $query->orderBy('first_name', 'asc')->orderBy('last_name', 'asc');
+                break;
+        }
+
+        $clients = $query->paginate(10);
         
         return view('cms.modules.clients.index', compact('clients'));
     }

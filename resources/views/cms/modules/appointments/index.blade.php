@@ -21,6 +21,81 @@
         
         <div class="row">
             <div class="col-md-12">
+                <!-- Filters and Sort Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Search & Filter</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('appointments.index') }}" id="filterForm">
+                            <!-- Search Row -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="client_search" class="form-label">Search Client</label>
+                                    <input type="text" class="form-control" id="client_search" name="client_search" 
+                                           placeholder="Name or email..." value="{{ request('client_search') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="location_search" class="form-label">Search Location</label>
+                                    <input type="text" class="form-control" id="location_search" name="location_search" 
+                                           placeholder="City, state, or address..." value="{{ request('location_search') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status">
+                                        <option value="">All Status</option>
+                                        <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                        <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Date Range Row -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="date_from" class="form-label">From Date</label>
+                                    <input type="date" class="form-control" id="date_from" name="date_from" 
+                                           value="{{ request('date_from') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="date_to" class="form-label">To Date</label>
+                                    <input type="date" class="form-control" id="date_to" name="date_to" 
+                                           value="{{ request('date_to') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="sort" class="form-label">Sort By</label>
+                                    <select class="form-select" id="sort" name="sort">
+                                        <option value="date_desc" {{ request('sort') == 'date_desc' ? 'selected' : '' }}>Date (Newest First)</option>
+                                        <option value="date_asc" {{ request('sort') == 'date_asc' ? 'selected' : '' }}>Date (Oldest First)</option>
+                                        <option value="client_asc" {{ request('sort') == 'client_asc' ? 'selected' : '' }}>Client Name (A-Z)</option>
+                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Price (High to Low)</option>
+                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price (Low to High)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 align-items-center">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                                <a href="{{ route('appointments.index') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </a>
+                                @if(request()->hasAny(['date_from', 'date_to', 'status', 'client_search', 'location_search', 'sort']))
+                                    <span class="badge bg-info">
+                                        {{ $appointments->count() }} appointment(s) found
+                                    </span>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Appointments Table -->
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">All Appointments</div>
@@ -181,6 +256,11 @@
                                 @endif
                             </tbody>
                         </table>
+                        
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $appointments->appends(request()->query())->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
