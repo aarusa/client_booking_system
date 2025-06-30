@@ -12,16 +12,42 @@ class Service extends Model
     protected $fillable = [
         'name',
         'description',
-        'price',
         'duration',
         'is_active'
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
         'duration' => 'integer',
         'is_active' => 'boolean'
     ];
+
+    /**
+     * Get the service prices for this service.
+     */
+    public function prices()
+    {
+        return $this->hasMany(ServicePrice::class);
+    }
+
+    /**
+     * Get the price for a specific dog size.
+     */
+    public function getPriceForSize($dogSize)
+    {
+        return $this->prices()
+                   ->where('dog_size', $dogSize)
+                   ->value('price');
+    }
+
+    /**
+     * Get all prices as an array.
+     */
+    public function getAllPrices()
+    {
+        return $this->prices()
+                   ->pluck('price', 'dog_size')
+                   ->toArray();
+    }
 
     /**
      * Get the appointments for this service.

@@ -324,27 +324,14 @@
                                     <div class="row">
                                         <div class="col-md-6 col-lg-6">
                                             <div class="form-group">
-                                                <label for="dogs[{{ $index }}][coat_type]">Coat Type</label>
-                                                <select
-                                                    class="form-control @error('dogs.'.$index.'.coat_type') is-invalid @enderror"
-                                                    id="dogs[{{ $index }}][coat_type]"
-                                                    name="dogs[{{ $index }}][coat_type]"
-                                                >
-                                                    <option value="">Select Coat Type</option>
-                                                    <option value="Short" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Short' ? 'selected' : '' }}>Short</option>
-                                                    <option value="Medium" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Medium' ? 'selected' : '' }}>Medium</option>
-                                                    <option value="Long" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Long' ? 'selected' : '' }}>Long</option>
-                                                    <option value="Curly" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Curly' ? 'selected' : '' }}>Curly</option>
-                                                    <option value="Wiry" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Wiry' ? 'selected' : '' }}>Wiry</option>
-                                                    <option value="Smooth" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Smooth' ? 'selected' : '' }}>Smooth</option>
-                                                    <option value="Double" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Double' ? 'selected' : '' }}>Double</option>
-                                                    <option value="Silky" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Silky' ? 'selected' : '' }}>Silky</option>
-                                                    <option value="Corded" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Corded' ? 'selected' : '' }}>Corded</option>
-                                                    <option value="Hairless" {{ old('dogs.'.$index.'.coat_type', $dog->coat_type) == 'Hairless' ? 'selected' : '' }}>Hairless</option>
+                                                <label for="dogs[{{ $index }}][size]">Size <span class="text-danger">*</span></label>
+                                                <select name="dogs[{{ $index }}][size]" class="form-control" required>
+                                                    <option value="">Select Size</option>
+                                                    <option value="small" {{ old('dogs.'.$index.'.size', $dog->size) == 'small' ? 'selected' : '' }}>Small (0-20 lbs)</option>
+                                                    <option value="medium" {{ old('dogs.'.$index.'.size', $dog->size) == 'medium' ? 'selected' : '' }}>Medium (21-50 lbs)</option>
+                                                    <option value="large" {{ old('dogs.'.$index.'.size', $dog->size) == 'large' ? 'selected' : '' }}>Large (51-100 lbs)</option>
+                                                    <option value="extra_large" {{ old('dogs.'.$index.'.size', $dog->size) == 'extra_large' ? 'selected' : '' }}>Extra Large (100+ lbs)</option>
                                                 </select>
-                                                @error('dogs.'.$index.'.coat_type')
-                                                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                @enderror
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-lg-6">
@@ -530,23 +517,13 @@
                     <div class="row">
                         <div class="col-md-6 col-lg-6">
                             <div class="form-group">
-                                <label for="dogs[${dogIndex}][coat_type]">Coat Type</label>
-                                <select
-                                    class="form-control"
-                                    id="dogs[${dogIndex}][coat_type]"
-                                    name="dogs[${dogIndex}][coat_type]"
-                                >
-                                    <option value="">Select Coat Type</option>
-                                    <option value="Short">Short</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Long">Long</option>
-                                    <option value="Curly">Curly</option>
-                                    <option value="Wiry">Wiry</option>
-                                    <option value="Smooth">Smooth</option>
-                                    <option value="Double">Double</option>
-                                    <option value="Silky">Silky</option>
-                                    <option value="Corded">Corded</option>
-                                    <option value="Hairless">Hairless</option>
+                                <label for="dogs[${dogIndex}][size]">Size <span class="text-danger">*</span></label>
+                                <select name="dogs[${dogIndex}][size]" class="form-control" required>
+                                    <option value="">Select Size</option>
+                                    <option value="small">Small (0-20 lbs)</option>
+                                    <option value="medium">Medium (21-50 lbs)</option>
+                                    <option value="large">Large (51-100 lbs)</option>
+                                    <option value="extra_large">Extra Large (100+ lbs)</option>
                                 </select>
                             </div>
                         </div>

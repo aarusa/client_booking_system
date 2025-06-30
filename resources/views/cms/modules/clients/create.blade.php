@@ -313,27 +313,14 @@
                                     <div class="row">
                                         <div class="col-md-6 col-lg-6">
                                             <div class="form-group">
-                                                <label for="dogs[0][coat_type]">Coat Type</label>
-                                                <select
-                                                    class="form-control @error('dogs.0.coat_type') is-invalid @enderror"
-                                                    id="dogs[0][coat_type]"
-                                                    name="dogs[0][coat_type]"
-                                                >
-                                                    <option value="">Select Coat Type</option>
-                                                    <option value="Short" {{ old('dogs.0.coat_type') == 'Short' ? 'selected' : '' }}>Short</option>
-                                                    <option value="Medium" {{ old('dogs.0.coat_type') == 'Medium' ? 'selected' : '' }}>Medium</option>
-                                                    <option value="Long" {{ old('dogs.0.coat_type') == 'Long' ? 'selected' : '' }}>Long</option>
-                                                    <option value="Curly" {{ old('dogs.0.coat_type') == 'Curly' ? 'selected' : '' }}>Curly</option>
-                                                    <option value="Wiry" {{ old('dogs.0.coat_type') == 'Wiry' ? 'selected' : '' }}>Wiry</option>
-                                                    <option value="Smooth" {{ old('dogs.0.coat_type') == 'Smooth' ? 'selected' : '' }}>Smooth</option>
-                                                    <option value="Double" {{ old('dogs.0.coat_type') == 'Double' ? 'selected' : '' }}>Double</option>
-                                                    <option value="Silky" {{ old('dogs.0.coat_type') == 'Silky' ? 'selected' : '' }}>Silky</option>
-                                                    <option value="Corded" {{ old('dogs.0.coat_type') == 'Corded' ? 'selected' : '' }}>Corded</option>
-                                                    <option value="Hairless" {{ old('dogs.0.coat_type') == 'Hairless' ? 'selected' : '' }}>Hairless</option>
+                                                <label for="dogs[0][size]">Size <span class="text-danger">*</span></label>
+                                                <select name="dogs[0][size]" class="form-control" required>
+                                                    <option value="">Select Size</option>
+                                                    <option value="small">Small (0-20 lbs)</option>
+                                                    <option value="medium">Medium (21-50 lbs)</option>
+                                                    <option value="large">Large (51-100 lbs)</option>
+                                                    <option value="extra_large">Extra Large (100+ lbs)</option>
                                                 </select>
-                                                @error('dogs.0.coat_type')
-                                                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                @enderror
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-lg-6">
@@ -519,23 +506,13 @@
                     <div class="row">
                         <div class="col-md-6 col-lg-6">
                             <div class="form-group">
-                                <label for="dogs[${dogIndex}][coat_type]">Coat Type</label>
-                                <select
-                                    class="form-control"
-                                    id="dogs[${dogIndex}][coat_type]"
-                                    name="dogs[${dogIndex}][coat_type]"
-                                >
-                                    <option value="">Select Coat Type</option>
-                                    <option value="Short">Short</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Long">Long</option>
-                                    <option value="Curly">Curly</option>
-                                    <option value="Wiry">Wiry</option>
-                                    <option value="Smooth">Smooth</option>
-                                    <option value="Double">Double</option>
-                                    <option value="Silky">Silky</option>
-                                    <option value="Corded">Corded</option>
-                                    <option value="Hairless">Hairless</option>
+                                <label for="dogs[${dogIndex}][size]">Size <span class="text-danger">*</span></label>
+                                <select name="dogs[${dogIndex}][size]" class="form-control" required>
+                                    <option value="">Select Size</option>
+                                    <option value="small">Small (0-20 lbs)</option>
+                                    <option value="medium">Medium (21-50 lbs)</option>
+                                    <option value="large">Large (51-100 lbs)</option>
+                                    <option value="extra_large">Extra Large (100+ lbs)</option>
                                 </select>
                             </div>
                         </div>

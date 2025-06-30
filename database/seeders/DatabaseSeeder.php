@@ -25,7 +25,9 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             UserSeeder::class,
             ServiceSeeder::class,
+            ServicePriceSeeder::class,
             ClientDogSeeder::class,
+            AppointmentSeeder::class,
         ]);
 
     }

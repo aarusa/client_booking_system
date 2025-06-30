@@ -17,6 +17,7 @@ class Dog extends Model
         'gender',
         'photo',
         'weight',
+        'size',
         'coat_type',
         'spayed_neutered',
         'behavior',

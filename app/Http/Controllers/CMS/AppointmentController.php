@@ -170,14 +170,54 @@ class AppointmentController extends Controller
             return back()->withErrors(['scheduling' => 'This time slot conflicts with an existing appointment.'])->withInput();
         }
 
-        // Define services array
+        // Define services with variable pricing based on dog size
         $services = [
-            1 => ['name' => 'Basic Grooming', 'price' => 45.00],
-            2 => ['name' => 'Full Grooming', 'price' => 75.00],
-            3 => ['name' => 'Nail Trim', 'price' => 15.00],
-            4 => ['name' => 'Ear Cleaning', 'price' => 12.00],
-            5 => ['name' => 'De-shedding Treatment', 'price' => 40.00],
-            6 => ['name' => 'Puppy Grooming', 'price' => 35.00],
+            1 => ['name' => 'Basic Grooming'],
+            2 => ['name' => 'Full Grooming'],
+            3 => ['name' => 'Nail Trim'],
+            4 => ['name' => 'Ear Cleaning'],
+            5 => ['name' => 'De-shedding Treatment'],
+            6 => ['name' => 'Puppy Grooming'],
+        ];
+
+        // Get the dog to determine size for pricing
+        $dog = Dog::find($request->dog_id);
+        $dogSize = $dog->size ?? 'medium'; // Default to medium if size not set
+
+        // Define pricing based on dog size
+        $pricing = [
+            'small' => [
+                1 => 35.00, // Basic Grooming
+                2 => 60.00, // Full Grooming
+                3 => 12.00, // Nail Trim
+                4 => 10.00, // Ear Cleaning
+                5 => 30.00, // De-shedding Treatment
+                6 => 25.00, // Puppy Grooming
+            ],
+            'medium' => [
+                1 => 45.00, // Basic Grooming
+                2 => 75.00, // Full Grooming
+                3 => 15.00, // Nail Trim
+                4 => 12.00, // Ear Cleaning
+                5 => 40.00, // De-shedding Treatment
+                6 => 35.00, // Puppy Grooming
+            ],
+            'large' => [
+                1 => 55.00, // Basic Grooming
+                2 => 90.00, // Full Grooming
+                3 => 18.00, // Nail Trim
+                4 => 15.00, // Ear Cleaning
+                5 => 50.00, // De-shedding Treatment
+                6 => 45.00, // Puppy Grooming
+            ],
+            'extra_large' => [
+                1 => 65.00, // Basic Grooming
+                2 => 110.00, // Full Grooming
+                3 => 20.00, // Nail Trim
+                4 => 18.00, // Ear Cleaning
+                5 => 60.00, // De-shedding Treatment
+                6 => 55.00, // Puppy Grooming
+            ],
         ];
 
         $appointment = new Appointment();
@@ -195,19 +235,24 @@ class AppointmentController extends Controller
         $appointment->amount_paid = $request->amount_paid ?: 0.00;
         $appointment->paid_at = $request->paid_at ? Carbon::parse($request->paid_at) : null;
 
-        // Calculate total price
+        // Calculate total price based on dog size
         $totalPrice = 0;
+        $selectedServices = [];
         foreach ($request->services as $serviceId) {
-            if (isset($services[$serviceId])) {
-                $totalPrice += $services[$serviceId]['price'];
+            if (isset($pricing[$dogSize][$serviceId])) {
+                $price = $pricing[$dogSize][$serviceId];
+                $totalPrice += $price;
+                $selectedServices[] = [
+                    'id' => $serviceId,
+                    'name' => $services[$serviceId]['name'],
+                    'price' => $price
+                ];
             }
         }
         $appointment->total_price = $totalPrice;
 
-        $appointment->save();
-
-        // Store services as JSON in the appointment
-        $appointment->services_data = json_encode($request->services);
+        // Store services as JSON in the appointment with pricing info
+        $appointment->services_data = json_encode($selectedServices);
         $appointment->save();
 
         return redirect()->route('appointments.index')->with('success', 'Appointment created successfully.');
@@ -316,14 +361,54 @@ class AppointmentController extends Controller
             return back()->withErrors(['scheduling' => 'This time slot conflicts with an existing appointment.'])->withInput();
         }
 
-        // Define services array
+        // Define services with variable pricing based on dog size
         $services = [
-            1 => ['name' => 'Basic Grooming', 'price' => 45.00],
-            2 => ['name' => 'Full Grooming', 'price' => 75.00],
-            3 => ['name' => 'Nail Trim', 'price' => 15.00],
-            4 => ['name' => 'Ear Cleaning', 'price' => 12.00],
-            5 => ['name' => 'De-shedding Treatment', 'price' => 40.00],
-            6 => ['name' => 'Puppy Grooming', 'price' => 35.00],
+            1 => ['name' => 'Basic Grooming'],
+            2 => ['name' => 'Full Grooming'],
+            3 => ['name' => 'Nail Trim'],
+            4 => ['name' => 'Ear Cleaning'],
+            5 => ['name' => 'De-shedding Treatment'],
+            6 => ['name' => 'Puppy Grooming'],
+        ];
+
+        // Get the dog to determine size for pricing
+        $dog = Dog::find($request->dog_id);
+        $dogSize = $dog->size ?? 'medium'; // Default to medium if size not set
+
+        // Define pricing based on dog size
+        $pricing = [
+            'small' => [
+                1 => 35.00, // Basic Grooming
+                2 => 60.00, // Full Grooming
+                3 => 12.00, // Nail Trim
+                4 => 10.00, // Ear Cleaning
+                5 => 30.00, // De-shedding Treatment
+                6 => 25.00, // Puppy Grooming
+            ],
+            'medium' => [
+                1 => 45.00, // Basic Grooming
+                2 => 75.00, // Full Grooming
+                3 => 15.00, // Nail Trim
+                4 => 12.00, // Ear Cleaning
+                5 => 40.00, // De-shedding Treatment
+                6 => 35.00, // Puppy Grooming
+            ],
+            'large' => [
+                1 => 55.00, // Basic Grooming
+                2 => 90.00, // Full Grooming
+                3 => 18.00, // Nail Trim
+                4 => 15.00, // Ear Cleaning
+                5 => 50.00, // De-shedding Treatment
+                6 => 45.00, // Puppy Grooming
+            ],
+            'extra_large' => [
+                1 => 65.00, // Basic Grooming
+                2 => 110.00, // Full Grooming
+                3 => 20.00, // Nail Trim
+                4 => 18.00, // Ear Cleaning
+                5 => 60.00, // De-shedding Treatment
+                6 => 55.00, // Puppy Grooming
+            ],
         ];
 
         $appointment->client_id = $request->client_id;
@@ -340,17 +425,24 @@ class AppointmentController extends Controller
         $appointment->amount_paid = $request->amount_paid ?: 0.00;
         $appointment->paid_at = $request->paid_at ? Carbon::parse($request->paid_at) : null;
 
-        // Calculate total price
+        // Calculate total price based on dog size
         $totalPrice = 0;
+        $selectedServices = [];
         foreach ($request->services as $serviceId) {
-            if (isset($services[$serviceId])) {
-                $totalPrice += $services[$serviceId]['price'];
+            if (isset($pricing[$dogSize][$serviceId])) {
+                $price = $pricing[$dogSize][$serviceId];
+                $totalPrice += $price;
+                $selectedServices[] = [
+                    'id' => $serviceId,
+                    'name' => $services[$serviceId]['name'],
+                    'price' => $price
+                ];
             }
         }
         $appointment->total_price = $totalPrice;
 
-        // Store services as JSON in the appointment
-        $appointment->services_data = json_encode($request->services);
+        // Store services as JSON in the appointment with pricing info
+        $appointment->services_data = json_encode($selectedServices);
         $appointment->save();
 
         return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
@@ -381,7 +473,9 @@ class AppointmentController extends Controller
      */
     public function getClientDogs($clientId)
     {
-        $dogs = Dog::where('client_id', $clientId)->get();
+        $dogs = Dog::where('client_id', $clientId)
+                   ->select('id', 'name', 'breed', 'size')
+                   ->get();
         return response()->json($dogs);
     }
 
@@ -411,5 +505,63 @@ class AppointmentController extends Controller
             'message' => 'Appointment status updated successfully.',
             'status' => $request->status
         ]);
+    }
+
+    /**
+     * Get service prices for a specific dog size (AJAX)
+     */
+    public function getServicePrices($dogSize)
+    {
+        // Validate dog size
+        $validSizes = ['small', 'medium', 'large', 'extra_large'];
+        if (!in_array($dogSize, $validSizes)) {
+            return response()->json(['error' => 'Invalid dog size'], 400);
+        }
+
+        // Define pricing based on dog size
+        $pricing = [
+            'small' => [
+                1 => 35.00, // Basic Grooming
+                2 => 60.00, // Full Grooming
+                3 => 12.00, // Nail Trim
+                4 => 10.00, // Ear Cleaning
+                5 => 30.00, // De-shedding Treatment
+                6 => 25.00, // Puppy Grooming
+            ],
+            'medium' => [
+                1 => 45.00, // Basic Grooming
+                2 => 75.00, // Full Grooming
+                3 => 15.00, // Nail Trim
+                4 => 12.00, // Ear Cleaning
+                5 => 40.00, // De-shedding Treatment
+                6 => 35.00, // Puppy Grooming
+            ],
+            'large' => [
+                1 => 55.00, // Basic Grooming
+                2 => 90.00, // Full Grooming
+                3 => 18.00, // Nail Trim
+                4 => 15.00, // Ear Cleaning
+                5 => 50.00, // De-shedding Treatment
+                6 => 45.00, // Puppy Grooming
+            ],
+            'extra_large' => [
+                1 => 65.00, // Basic Grooming
+                2 => 110.00, // Full Grooming
+                3 => 20.00, // Nail Trim
+                4 => 18.00, // Ear Cleaning
+                5 => 60.00, // De-shedding Treatment
+                6 => 55.00, // Puppy Grooming
+            ],
+        ];
+
+        $prices = [];
+        foreach ($pricing[$dogSize] as $serviceId => $price) {
+            $prices[] = [
+                'service_id' => $serviceId,
+                'price' => $price
+            ];
+        }
+
+        return response()->json($prices);
     }
 }

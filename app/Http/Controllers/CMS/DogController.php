@@ -48,6 +48,7 @@ class DogController extends Controller
             'age' => 'nullable|integer|min:0|max:30',
             'gender' => 'nullable|in:male,female',
             'weight' => 'nullable|numeric|min:0|max:200',
+            'size' => 'required|in:small,medium,large,extra_large',
             'coat_type' => 'nullable|in:short,medium,long,curly,wire',
             'spayed_neutered' => 'nullable|in:yes,no,unknown',
             'behavior' => 'nullable|string|max:500',
@@ -64,6 +65,8 @@ class DogController extends Controller
             'weight.numeric' => 'Weight must be a number.',
             'weight.min' => 'Weight cannot be negative.',
             'weight.max' => 'Weight cannot exceed 200 lbs.',
+            'size.required' => 'Please select a dog size.',
+            'size.in' => 'Please select a valid dog size.',
             'coat_type.in' => 'Please select a valid coat type.',
             'spayed_neutered.in' => 'Please select a valid option.',
         ]);
@@ -75,6 +78,7 @@ class DogController extends Controller
         $dog->age = $request->age;
         $dog->gender = $request->gender;
         $dog->weight = $request->weight;
+        $dog->size = $request->size;
         $dog->coat_type = $request->coat_type;
         $dog->spayed_neutered = $request->spayed_neutered;
         $dog->behavior = $request->behavior;
@@ -129,6 +133,7 @@ class DogController extends Controller
             'age' => 'nullable|integer|min:0|max:30',
             'gender' => 'nullable|in:male,female',
             'weight' => 'nullable|numeric|min:0|max:200',
+            'size' => 'required|in:small,medium,large,extra_large',
             'coat_type' => 'nullable|in:short,medium,long,curly,wire',
             'spayed_neutered' => 'nullable|in:yes,no,unknown',
             'behavior' => 'nullable|string|max:500',
@@ -145,6 +150,8 @@ class DogController extends Controller
             'weight.numeric' => 'Weight must be a number.',
             'weight.min' => 'Weight cannot be negative.',
             'weight.max' => 'Weight cannot exceed 200 lbs.',
+            'size.required' => 'Please select a dog size.',
+            'size.in' => 'Please select a valid dog size.',
             'coat_type.in' => 'Please select a valid coat type.',
             'spayed_neutered.in' => 'Please select a valid option.',
         ]);
@@ -156,6 +163,7 @@ class DogController extends Controller
         $dog->age = $request->age;
         $dog->gender = $request->gender;
         $dog->weight = $request->weight;
+        $dog->size = $request->size;
         $dog->coat_type = $request->coat_type;
         $dog->spayed_neutered = $request->spayed_neutered;
         $dog->behavior = $request->behavior;

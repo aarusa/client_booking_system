@@ -98,13 +98,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AppointmentController::class, 'index'])->name('index');
         Route::get('/create', [AppointmentController::class, 'create'])->name('create');
         Route::post('/', [AppointmentController::class, 'store'])->name('store');
+        // AJAX: Get dogs for a client
+        Route::get('/client/{client}/dogs', [AppointmentController::class, 'getClientDogs'])->name('client.dogs');
+        // AJAX: Get service prices for dog size
+        Route::get('/services/prices/{dogSize}', [AppointmentController::class, 'getServicePrices'])->name('services.prices');
+        // Status update
+        Route::patch('/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('update-status');
         Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('show');
         Route::get('/{appointment}/edit', [AppointmentController::class, 'edit'])->name('edit');
         Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('update');
         Route::delete('/{appointment}', [AppointmentController::class, 'destroy'])->name('destroy');
-        // AJAX: Get dogs for a client
-        Route::get('/client/{client}/dogs', [AppointmentController::class, 'getClientDogs'])->name('client.dogs');
-        // Status update
-        Route::patch('/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('update-status');
     });
 });

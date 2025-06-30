@@ -115,7 +115,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-4 col-lg-4">
+                                <div class="col-md-3 col-lg-3">
                                     <div class="form-group">
                                         <label for="weight">Weight (lbs)</label>
                                         <input
@@ -134,7 +134,27 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4 col-lg-4">
+                                <div class="col-md-3 col-lg-3">
+                                    <div class="form-group">
+                                        <label for="size">Size <span class="text-danger">*</span></label>
+                                        <select
+                                            class="form-select form-control @error('size') is-invalid @enderror"
+                                            id="size"
+                                            name="size"
+                                            required
+                                        >
+                                            <option value="">Select Size</option>
+                                            <option value="small" {{ old('size', $dog->size) == 'small' ? 'selected' : '' }}>Small (0-20 lbs)</option>
+                                            <option value="medium" {{ old('size', $dog->size) == 'medium' ? 'selected' : '' }}>Medium (21-50 lbs)</option>
+                                            <option value="large" {{ old('size', $dog->size) == 'large' ? 'selected' : '' }}>Large (51-100 lbs)</option>
+                                            <option value="extra_large" {{ old('size', $dog->size) == 'extra_large' ? 'selected' : '' }}>Extra Large (100+ lbs)</option>
+                                        </select>
+                                        @error('size')
+                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-lg-3">
                                     <div class="form-group">
                                         <label for="coat_type">Coat Type</label>
                                         <select
@@ -154,7 +174,7 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4 col-lg-4">
+                                <div class="col-md-3 col-lg-3">
                                     <div class="form-group">
                                         <label for="spayed_neutered">Spayed/Neutered</label>
                                         <select

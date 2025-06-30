@@ -98,12 +98,12 @@
                                 <div class="border rounded">
                                     @php
                                         $services = [
-                                            ['id' => 1, 'name' => 'Basic Grooming', 'description' => 'Bath, brush, nail trim, and basic styling', 'price' => 45.00, 'duration' => 60],
-                                            ['id' => 2, 'name' => 'Full Grooming', 'description' => 'Complete grooming including haircut, bath, brush, nail trim, and styling', 'price' => 75.00, 'duration' => 90],
-                                            ['id' => 3, 'name' => 'Nail Trim', 'description' => 'Nail trimming and filing', 'price' => 15.00, 'duration' => 15],
-                                            ['id' => 4, 'name' => 'Ear Cleaning', 'description' => 'Ear cleaning and inspection', 'price' => 12.00, 'duration' => 15],
-                                            ['id' => 5, 'name' => 'De-shedding Treatment', 'description' => 'Specialized treatment to reduce shedding', 'price' => 40.00, 'duration' => 45],
-                                            ['id' => 6, 'name' => 'Puppy Grooming', 'description' => 'Gentle grooming for puppies (under 6 months)', 'price' => 35.00, 'duration' => 45],
+                                            ['id' => 1, 'name' => 'Basic Grooming', 'description' => 'Bath, brush, nail trim, and basic styling', 'duration' => 60],
+                                            ['id' => 2, 'name' => 'Full Grooming', 'description' => 'Complete grooming including haircut, bath, brush, nail trim, and styling', 'duration' => 90],
+                                            ['id' => 3, 'name' => 'Nail Trim', 'description' => 'Nail trimming and filing', 'duration' => 15],
+                                            ['id' => 4, 'name' => 'Ear Cleaning', 'description' => 'Ear cleaning and inspection', 'duration' => 15],
+                                            ['id' => 5, 'name' => 'De-shedding Treatment', 'description' => 'Specialized treatment to reduce shedding', 'duration' => 45],
+                                            ['id' => 6, 'name' => 'Puppy Grooming', 'description' => 'Gentle grooming for puppies (under 6 months)', 'duration' => 45],
                                         ];
                                     @endphp
                                     
@@ -116,7 +116,7 @@
                                                            name="services[]" 
                                                            value="{{ $service['id'] }}" 
                                                            id="service_{{ $service['id'] }}"
-                                                           data-price="{{ $service['price'] }}"
+                                                           data-service-id="{{ $service['id'] }}"
                                                            data-duration="{{ $service['duration'] }}"
                                                            {{ in_array($service['id'], old('services', [])) ? 'checked' : '' }}>
                                                 </div>
@@ -127,12 +127,18 @@
                                                     <div class="text-muted small">{{ $service['description'] }}</div>
                                                 </div>
                                                 <div class="col-3 text-end">
-                                                    <div class="text-primary fw-bold">${{ number_format($service['price'], 2) }}</div>
+                                                    <div class="text-primary fw-bold service-price" data-service-id="{{ $service['id'] }}">$0.00</div>
                                                     <div class="text-info small">{{ $service['duration'] }} min</div>
                                                 </div>
                                             </div>
                                         </div>
                                     @endforeach
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Prices vary based on dog size. Select a dog to see accurate pricing.
+                                    </small>
                                 </div>
                             </div>
 
@@ -275,11 +281,38 @@
                 if (clientId) {
                     $.get(`/appointments/client/${clientId}/dogs`, function(data) {
                         data.forEach(function(dog) {
-                            dogSelect.append(`<option value="${dog.id}">${dog.name} (${dog.breed || 'Unknown breed'})</option>`);
+                            dogSelect.append(`<option value="${dog.id}" data-size="${dog.size || 'medium'}">${dog.name} (${dog.breed || 'Unknown breed'}) - ${dog.size || 'Medium'} size</option>`);
                         });
                     });
                 }
+                
+                // Reset pricing when client changes
+                $('.service-price').text('$0.00');
+                calculateTotals();
             });
+
+            // Load service prices when dog is selected
+            $('#dog_id').change(function() {
+                const dogId = $(this).val();
+                const selectedOption = $(this).find('option:selected');
+                const dogSize = selectedOption.data('size');
+                
+                if (dogId && dogSize) {
+                    loadServicePrices(dogSize);
+                } else {
+                    $('.service-price').text('$0.00');
+                    calculateTotals();
+                }
+            });
+
+            function loadServicePrices(dogSize) {
+                $.get(`/appointments/services/prices/${dogSize}`, function(data) {
+                    data.forEach(function(service) {
+                        $(`.service-price[data-service-id="${service.service_id}"]`).text('$' + parseFloat(service.price).toFixed(2));
+                    });
+                    calculateTotals();
+                });
+            }
 
             // Calculate total price when services are selected
             $('.service-checkbox').change(function() {
@@ -292,9 +325,12 @@
                 let selectedServices = [];
                 
                 $('.service-checkbox:checked').each(function() {
-                    const price = parseFloat($(this).data('price'));
+                    const serviceId = $(this).data('service-id');
                     const duration = parseInt($(this).data('duration'));
                     const name = $(this).closest('.row').find('.form-check-label').text().trim();
+                    const priceElement = $(`.service-price[data-service-id="${serviceId}"]`);
+                    const price = parseFloat(priceElement.text().replace('$', '')) || 0;
+                    
                     total += price;
                     totalDuration += duration;
                     selectedServices.push(name);
@@ -313,7 +349,7 @@
                 }
             }
 
-            // Initialize totals if services are pre-selected
+            // Initialize totals
             calculateTotals();
         });
     </script>

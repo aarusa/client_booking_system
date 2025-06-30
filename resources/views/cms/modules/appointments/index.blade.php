@@ -155,21 +155,12 @@
                                             </td>
                                             <td>
                                                 @php
-                                                    $services = [
-                                                        1 => 'Basic Grooming',
-                                                        2 => 'Full Grooming',
-                                                        3 => 'Nail Trim',
-                                                        4 => 'Ear Cleaning',
-                                                        5 => 'De-shedding Treatment',
-                                                        6 => 'Puppy Grooming',
-                                                    ];
-                                                    
                                                     $selectedServices = json_decode($appointment->services_data ?? '[]', true) ?: [];
                                                 @endphp
                                                 
-                                                @foreach($selectedServices as $serviceId)
-                                                    @if(isset($services[$serviceId]))
-                                                        <span class="badge bg-primary me-1">{{ $services[$serviceId] }}</span>
+                                                @foreach($selectedServices as $service)
+                                                    @if(isset($service['name']))
+                                                        <span class="badge bg-primary me-1">{{ $service['name'] }}</span>
                                                     @endif
                                                 @endforeach
                                             </td>
@@ -257,9 +248,24 @@
                             </tbody>
                         </table>
                         
-                        <!-- Pagination -->
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $appointments->appends(request()->query())->links() }}
+                        <!-- Pagination and Results Summary -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <!-- Results Summary -->
+                            <div class="text-muted">
+                                @if($appointments->count() > 0)
+                                    Showing {{ $appointments->firstItem() }} to {{ $appointments->lastItem() }} 
+                                    of {{ $appointments->total() }} appointment(s)
+                                @else
+                                    No appointments found
+                                @endif
+                            </div>
+                            
+                            <!-- Pagination -->
+                            @if($appointments->hasPages())
+                                <nav aria-label="Appointments pagination">
+                                    {{ $appointments->appends(request()->query())->links('pagination::bootstrap-4') }}
+                                </nav>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -270,6 +276,77 @@
 @endsection
 
 @push('scripts')
+    <style>
+        /* Custom pagination styling */
+        .pagination {
+            margin-bottom: 0;
+        }
+        
+        .page-link {
+            color: #007bff;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem 0.75rem;
+            margin-left: -1px;
+            line-height: 1.25;
+            transition: all 0.15s ease-in-out;
+        }
+        
+        .page-link:hover {
+            color: #0056b3;
+            text-decoration: none;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        .page-link:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .page-item.active .page-link {
+            z-index: 1;
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        
+        .page-item:first-child .page-link {
+            margin-left: 0;
+            border-top-left-radius: 0.25rem;
+            border-bottom-left-radius: 0.25rem;
+        }
+        
+        .page-item:last-child .page-link {
+            border-top-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+        }
+        
+        /* Results summary styling */
+        .results-summary {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        /* Responsive pagination */
+        @media (max-width: 768px) {
+            .d-flex.justify-content-between.align-items-center {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .pagination {
+                justify-content: center;
+            }
+        }
+    </style>
+    
     <script>
         // Check for success message
         @if (session('success'))

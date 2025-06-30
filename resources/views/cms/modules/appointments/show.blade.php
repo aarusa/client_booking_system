@@ -12,14 +12,25 @@
                 <p class="text-muted mb-0">{{ $appointment->client->first_name }} {{ $appointment->client->last_name }} • {{ $appointment->dog->name }}</p>
             </div>
             <div class="ms-md-auto py-2 py-md-0">
-                @can('appointment-edit')
-                <a href="{{ route('appointments.edit', $appointment->id) }}" class="btn btn-warning btn-round me-2">
-                    <i class="fas fa-edit me-2"></i>Edit
-                </a>
-                @endcan
-                <a href="{{ route('appointments.index') }}" class="btn btn-secondary btn-round">
-                    <i class="fas fa-arrow-left me-2"></i>Back
-                </a>
+                <div class="btn-group" role="group">
+                    @can('appointment-edit')
+                    <a href="{{ route('appointments.edit', $appointment->id) }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                    @endcan
+                    @can('appointment-delete')
+                    <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" style="display:inline-block" class="delete-appointment-form ms-1">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm delete-appointment-btn">
+                            <i class="fas fa-trash-alt me-1"></i>Delete
+                        </button>
+                    </form>
+                    @endcan
+                    <a href="{{ route('appointments.index') }}" class="btn btn-outline-secondary btn-sm ms-1">
+                        <i class="fas fa-arrow-left me-1"></i>Back
+                    </a>
+                </div>
             </div>
         </div>
         
@@ -117,14 +128,29 @@
                         @endphp
                         
                         @if(!empty($selectedServices))
-                            <div class="row g-2">
-                                @foreach($selectedServices as $serviceId)
-                                    @if(isset($services[$serviceId]))
-                                        <div class="col-auto">
-                                            <span class="badge bg-secondary">{{ $services[$serviceId] }}</span>
-                                        </div>
-                                    @endif
-                                @endforeach
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th class="text-end">Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($selectedServices as $service)
+                                            @if(isset($services[$service['id']]))
+                                                <tr>
+                                                    <td>{{ $services[$service['id']] }}</td>
+                                                    <td class="text-end">${{ number_format($service['price'] ?? 0, 2) }}</td>
+                                                </tr>
+                                            @endif
+                                        @endforeach
+                                        <tr class="table-active">
+                                            <td><strong>Total</strong></td>
+                                            <td class="text-end"><strong>${{ number_format($appointment->total_price, 2) }}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         @else
                             <p class="text-muted mb-0">No services selected</p>
@@ -202,6 +228,13 @@
                                 <div class="mb-3">
                                     <small class="text-muted d-block">Weight</small>
                                     <strong>{{ $appointment->dog->weight }} lbs</strong>
+                                </div>
+                                @endif
+                                
+                                @if($appointment->dog->size)
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Size</small>
+                                    <strong>{{ ucfirst(str_replace('_', ' ', $appointment->dog->size)) }}</strong>
                                 </div>
                                 @endif
                                 
@@ -310,4 +343,31 @@
         </div>
     </div>
     
+@endsection
+
+@section('scripts')
+<script>
+    // SweetAlert confirmation for delete appointment
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.delete-appointment-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
 @endsection 

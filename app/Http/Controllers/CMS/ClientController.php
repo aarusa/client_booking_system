@@ -132,6 +132,7 @@ class ClientController extends Controller
             'dogs.*.spayed_neutered' => 'nullable|in:Yes,No,Unknown',
             'dogs.*.behavior' => 'nullable|string',
             'dogs.*.notes' => 'nullable|string',
+            'dogs.*.size' => 'required|in:small,medium,large,extra_large',
         ], [
             'first_name.required' => 'First name is required.',
             'last_name.required' => 'Last name is required.',
@@ -189,6 +190,7 @@ class ClientController extends Controller
                     $dog->spayed_neutered = $dogData['spayed_neutered'] ?? null;
                     $dog->behavior = $dogData['behavior'] ?? null;
                     $dog->notes = $dogData['notes'] ?? null;
+                    $dog->size = $dogData['size'] ?? null;
                     $dog->save();
                     $dogsCreated++;
                 }
@@ -269,6 +271,7 @@ class ClientController extends Controller
             'dogs.*.spayed_neutered' => 'nullable|in:Yes,No,Unknown',
             'dogs.*.behavior' => 'nullable|string',
             'dogs.*.notes' => 'nullable|string',
+            'dogs.*.size' => 'required|in:small,medium,large,extra_large',
         ], [
             'first_name.required' => 'First name is required.',
             'last_name.required' => 'Last name is required.',
@@ -329,6 +332,7 @@ class ClientController extends Controller
                             $dog->spayed_neutered = $dogData['spayed_neutered'] ?? null;
                             $dog->behavior = $dogData['behavior'] ?? null;
                             $dog->notes = $dogData['notes'] ?? null;
+                            $dog->size = $dogData['size'] ?? $dog->size;
                             $dog->save();
                             $existingDogIds[] = $dog->id;
                             $dogsUpdated++;
@@ -346,6 +350,7 @@ class ClientController extends Controller
                         $dog->spayed_neutered = $dogData['spayed_neutered'] ?? null;
                         $dog->behavior = $dogData['behavior'] ?? null;
                         $dog->notes = $dogData['notes'] ?? null;
+                        $dog->size = $dogData['size'] ?? null;
                         $dog->save();
                         $existingDogIds[] = $dog->id;
                         $dogsUpdated++;

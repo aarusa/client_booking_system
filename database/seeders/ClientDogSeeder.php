@@ -77,6 +77,19 @@ class ClientDogSeeder extends Seeder
             for ($j = 0; $j < $numDogs; $j++) {
                 $gender = $faker->randomElement(['Male', 'Female']);
                 $age = $faker->numberBetween(1, 15);
+                $weight = $faker->numberBetween(2, 80);
+                
+                // Determine size based on weight
+                $size = 'medium'; // default
+                if ($weight <= 20) {
+                    $size = 'small';
+                } elseif ($weight <= 50) {
+                    $size = 'medium';
+                } elseif ($weight <= 100) {
+                    $size = 'large';
+                } else {
+                    $size = 'extra_large';
+                }
                 
                 Dog::create([
                     'client_id' => $client->id,
@@ -84,7 +97,8 @@ class ClientDogSeeder extends Seeder
                     'breed' => $faker->randomElement($breeds),
                     'age' => $age,
                     'gender' => $gender,
-                    'weight' => $faker->numberBetween(2, 80),
+                    'weight' => $weight,
+                    'size' => $size,
                     'coat_type' => $faker->randomElement($coatTypes),
                     'spayed_neutered' => $faker->randomElement(['Yes', 'No', 'Unknown']),
                     'behavior' => $faker->optional(0.8)->sentence(),
