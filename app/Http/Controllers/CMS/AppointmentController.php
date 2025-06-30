@@ -53,6 +53,10 @@ class AppointmentController extends Controller
             'services' => 'required|array|min:1',
             'services.*' => 'integer|between:1,6',
             'notes' => 'nullable|string',
+            'payment_status' => 'nullable|in:pending,paid,partial,refunded',
+            'payment_mode' => 'nullable|in:cash,payid,card,bank_transfer',
+            'amount_paid' => 'nullable|numeric|min:0',
+            'paid_at' => 'nullable|date',
         ], [
             'client_id.required' => 'Please select a client.',
             'client_id.exists' => 'Selected client is invalid.',
@@ -70,6 +74,11 @@ class AppointmentController extends Controller
             'services.min' => 'Please select at least one service.',
             'services.*.integer' => 'Invalid service selected.',
             'services.*.between' => 'Invalid service selected.',
+            'payment_status.in' => 'Invalid payment status selected.',
+            'payment_mode.in' => 'Invalid payment mode selected.',
+            'amount_paid.numeric' => 'Amount paid must be a valid number.',
+            'amount_paid.min' => 'Amount paid cannot be negative.',
+            'paid_at.date' => 'Payment date must be a valid date.',
         ]);
 
         // Create datetime objects for comparison
@@ -115,6 +124,12 @@ class AppointmentController extends Controller
         $appointment->end_time = $endDateTime;
         $appointment->status = 'scheduled';
         $appointment->notes = $request->notes;
+
+        // Payment fields
+        $appointment->payment_status = $request->payment_status ?: 'pending';
+        $appointment->payment_mode = $request->payment_mode;
+        $appointment->amount_paid = $request->amount_paid ?: 0.00;
+        $appointment->paid_at = $request->paid_at ? Carbon::parse($request->paid_at) : null;
 
         // Calculate total price
         $totalPrice = 0;
@@ -180,6 +195,10 @@ class AppointmentController extends Controller
             'services' => 'required|array|min:1',
             'services.*' => 'integer|between:1,6',
             'notes' => 'nullable|string',
+            'payment_status' => 'nullable|in:pending,paid,partial,refunded',
+            'payment_mode' => 'nullable|in:cash,payid,card,bank_transfer',
+            'amount_paid' => 'nullable|numeric|min:0',
+            'paid_at' => 'nullable|date',
         ], [
             'client_id.required' => 'Please select a client.',
             'client_id.exists' => 'Selected client is invalid.',
@@ -198,6 +217,11 @@ class AppointmentController extends Controller
             'services.min' => 'Please select at least one service.',
             'services.*.integer' => 'Invalid service selected.',
             'services.*.between' => 'Invalid service selected.',
+            'payment_status.in' => 'Invalid payment status selected.',
+            'payment_mode.in' => 'Invalid payment mode selected.',
+            'amount_paid.numeric' => 'Amount paid must be a valid number.',
+            'amount_paid.min' => 'Amount paid cannot be negative.',
+            'paid_at.date' => 'Payment date must be a valid date.',
         ]);
 
         $appointment = Appointment::findOrFail($id);
@@ -245,6 +269,12 @@ class AppointmentController extends Controller
         $appointment->end_time = $endDateTime;
         $appointment->status = $request->status;
         $appointment->notes = $request->notes;
+
+        // Payment fields
+        $appointment->payment_status = $request->payment_status ?: 'pending';
+        $appointment->payment_mode = $request->payment_mode;
+        $appointment->amount_paid = $request->amount_paid ?: 0.00;
+        $appointment->paid_at = $request->paid_at ? Carbon::parse($request->paid_at) : null;
 
         // Calculate total price
         $totalPrice = 0;

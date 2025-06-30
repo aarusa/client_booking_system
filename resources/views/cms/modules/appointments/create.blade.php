@@ -144,6 +144,67 @@
                                     <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                 @enderror
                             </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="payment_status">Payment Status</label>
+                                        <select name="payment_status" id="payment_status" class="form-control @error('payment_status') is-invalid @enderror">
+                                            <option value="">Select Payment Status</option>
+                                            <option value="pending" {{ old('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                            <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                                            <option value="refunded" {{ old('payment_status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                        </select>
+                                        @error('payment_status')
+                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="payment_mode">Payment Mode</label>
+                                        <select name="payment_mode" id="payment_mode" class="form-control @error('payment_mode') is-invalid @enderror">
+                                            <option value="">Select Payment Mode</option>
+                                            <option value="cash" {{ old('payment_mode') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                            <option value="payid" {{ old('payment_mode') == 'payid' ? 'selected' : '' }}>PayID</option>
+                                            <option value="card" {{ old('payment_mode') == 'card' ? 'selected' : '' }}>Card</option>
+                                            <option value="bank_transfer" {{ old('payment_mode') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                        </select>
+                                        @error('payment_mode')
+                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="amount_paid">Amount Paid</label>
+                                        <input type="number" name="amount_paid" id="amount_paid" 
+                                               class="form-control @error('amount_paid') is-invalid @enderror" 
+                                               value="{{ old('amount_paid', 0) }}" 
+                                               step="0.01" min="0" placeholder="0.00">
+                                        @error('amount_paid')
+                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="paid_at">Payment Date</label>
+                                        <input type="datetime-local" name="paid_at" id="paid_at" 
+                                               class="form-control @error('paid_at') is-invalid @enderror" 
+                                               value="{{ old('paid_at') }}">
+                                        @error('paid_at')
+                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-action">
                             <button class="btn btn-info" type="submit">Save</button>

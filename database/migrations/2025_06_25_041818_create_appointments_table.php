@@ -25,6 +25,10 @@ return new class extends Migration
             $table->json('services_data')->nullable();
             $table->foreignId('subscription_id')->nullable()->constrained('subscriptions')->onDelete('set null');
             $table->text('notes')->nullable();
+            $table->enum('payment_status', ['pending', 'paid', 'partial', 'refunded'])->default('pending');
+            $table->enum('payment_mode', ['cash', 'payid', 'card', 'bank_transfer'])->nullable();
+            $table->decimal('amount_paid', 8, 2)->default(0.00);
+            $table->timestamp('paid_at')->nullable();
             $table->timestamps();
             
             // Add indexes for better performance

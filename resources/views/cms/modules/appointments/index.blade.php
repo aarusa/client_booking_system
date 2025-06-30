@@ -140,6 +140,11 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column gap-1">
+                                                    @can('appointment-view')
+                                                        <a href="{{ route('appointments.show', $appointment->id) }}" class="btn btn-info btn-sm">
+                                                            View
+                                                        </a>
+                                                    @endcan
                                                     @can('appointment-edit')
                                                         <a href="{{ route('appointments.edit', $appointment->id) }}" class="btn btn-warning btn-sm">Edit</a>
                                                     @endcan

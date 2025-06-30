@@ -71,4 +71,40 @@ class Client extends Model
     {
         return $this->hasMany(Subscription::class);
     }
+
+    /**
+     * Get the total earnings from this client.
+     */
+    public function getTotalEarnedAttribute()
+    {
+        return $this->appointments()
+            ->where('status', 'completed')
+            ->sum('total_price');
+    }
+
+    /**
+     * Get the total paid amount from this client.
+     */
+    public function getTotalPaidAttribute()
+    {
+        return $this->appointments()
+            ->where('payment_status', 'paid')
+            ->sum('amount_paid');
+    }
+
+    /**
+     * Get the outstanding balance for this client.
+     */
+    public function getOutstandingBalanceAttribute()
+    {
+        return $this->total_earned - $this->total_paid;
+    }
+
+    /**
+     * Check if client has outstanding payments.
+     */
+    public function hasOutstandingPayments()
+    {
+        return $this->outstanding_balance > 0;
+    }
 }

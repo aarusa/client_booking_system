@@ -27,6 +27,9 @@ return new class extends Migration
             $table->string('behavior')->nullable();
             $table->text('tags')->nullable();
             $table->text('notes')->nullable();
+            $table->string('before_photo')->nullable()->comment('Before grooming photo');
+            $table->string('after_photo')->nullable()->comment('After grooming photo');
+            $table->json('general_photos')->nullable()->comment('Array of general photo paths');
             $table->timestamps();
             
             // Add indexes for better performance
