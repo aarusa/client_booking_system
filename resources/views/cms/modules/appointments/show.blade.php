@@ -8,8 +8,8 @@
         <!-- Header Section -->
         <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
             <div>
-                <h3 class="fw-bold mb-3">Appointment #{{ $appointment->id }}</h3>
-                <h6 class="op-7 mb-2">{{ $appointment->client->first_name }} {{ $appointment->client->last_name }} - {{ $appointment->dog->name }}</h6>
+                <h3 class="fw-bold mb-2">Appointment #{{ $appointment->id }}</h3>
+                <p class="text-muted mb-0">{{ $appointment->client->first_name }} {{ $appointment->client->last_name }} • {{ $appointment->dog->name }}</p>
             </div>
             <div class="ms-md-auto py-2 py-md-0">
                 @can('appointment-edit')
@@ -27,79 +27,107 @@
         <div class="row">
             <!-- Left Column - Main Info -->
             <div class="col-lg-8">
-                <!-- Appointment Details -->
+                <!-- Appointment Overview -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Appointment Details</h5>
+                        <h5 class="card-title mb-0">Appointment Overview</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row g-3">
+                        <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="text-muted small">Date</label>
-                                <div class="fw-bold">{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('l, F d, Y') }}</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="text-muted small">Time</label>
-                                <div class="fw-bold">{{ \Carbon\Carbon::parse($appointment->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($appointment->end_time)->format('g:i A') }}</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="text-muted small">Status</label>
-                                <div>
-                                    @php
-                                        $statusColors = [
-                                            'scheduled' => 'warning',
-                                            'confirmed' => 'info',
-                                            'in_progress' => 'primary',
-                                            'completed' => 'success',
-                                            'cancelled' => 'danger'
-                                        ];
-                                    @endphp
-                                    <span class="badge bg-{{ $statusColors[$appointment->status] ?? 'secondary' }}">
-                                        {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
-                                    </span>
+                                <div class="d-flex align-items-start">
+                                    <div class="text-center me-3" style="width: 30px;">
+                                        <i class="fas fa-calendar text-muted"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block mb-1">Date & Time</small>
+                                        <div class="fw-bold">{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('l, F d, Y') }}</div>
+                                        <div class="text-muted">{{ \Carbon\Carbon::parse($appointment->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($appointment->end_time)->format('g:i A') }}</div>
+                                    </div>
                                 </div>
                             </div>
+                            
                             <div class="col-md-6">
-                                <label class="text-muted small">Total Price</label>
-                                <div class="fw-bold h5 text-success">${{ number_format($appointment->total_price, 2) }}</div>
+                                <div class="d-flex align-items-start">
+                                    <div class="text-center me-3" style="width: 30px;">
+                                        <i class="fas fa-clock text-muted"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block mb-1">Duration</small>
+                                        <div class="fw-bold">{{ \Carbon\Carbon::parse($appointment->start_time)->diffInMinutes(\Carbon\Carbon::parse($appointment->end_time)) }} minutes</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <div class="text-center me-3" style="width: 30px;">
+                                        <i class="fas fa-tag text-muted"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block mb-1">Status</small>
+                                        @php
+                                            $statusColors = [
+                                                'scheduled' => 'warning',
+                                                'confirmed' => 'info',
+                                                'in_progress' => 'primary',
+                                                'completed' => 'success',
+                                                'cancelled' => 'danger'
+                                            ];
+                                        @endphp
+                                        <span class="badge bg-{{ $statusColors[$appointment->status] ?? 'secondary' }}">
+                                            {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <div class="text-center me-3" style="width: 30px;">
+                                        <i class="fas fa-dollar-sign text-muted"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block mb-1">Total Price</small>
+                                        <div class="fw-bold h5 mb-0">${{ number_format($appointment->total_price, 2) }}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Services -->
-                        <div class="mt-4">
-                            <label class="text-muted small">Services</label>
-                            @php
-                                $services = [
-                                    1 => 'Basic Grooming',
-                                    2 => 'Full Grooming',
-                                    3 => 'Nail Trim',
-                                    4 => 'Ear Cleaning',
-                                    5 => 'De-shedding Treatment',
-                                    6 => 'Puppy Grooming',
-                                ];
-                                
-                                $selectedServices = json_decode($appointment->services_data ?? '[]', true) ?: [];
-                            @endphp
+                <!-- Services -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Services</h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $services = [
+                                1 => 'Basic Grooming',
+                                2 => 'Full Grooming',
+                                3 => 'Nail Trim',
+                                4 => 'Ear Cleaning',
+                                5 => 'De-shedding Treatment',
+                                6 => 'Puppy Grooming',
+                            ];
                             
-                            <div class="mt-2">
+                            $selectedServices = json_decode($appointment->services_data ?? '[]', true) ?: [];
+                        @endphp
+                        
+                        @if(!empty($selectedServices))
+                            <div class="row g-2">
                                 @foreach($selectedServices as $serviceId)
                                     @if(isset($services[$serviceId]))
-                                        <span class="badge bg-primary me-2 mb-2">{{ $services[$serviceId] }}</span>
+                                        <div class="col-auto">
+                                            <span class="badge bg-secondary">{{ $services[$serviceId] }}</span>
+                                        </div>
                                     @endif
                                 @endforeach
-                                @if(empty($selectedServices))
-                                    <span class="text-muted">No services selected</span>
-                                @endif
                             </div>
-                        </div>
-
-                        @if($appointment->notes)
-                        <div class="mt-4">
-                            <label class="text-muted small">Notes</label>
-                            <div class="bg-light p-3 rounded mt-2">
-                                {{ $appointment->notes }}
-                            </div>
-                        </div>
+                        @else
+                            <p class="text-muted mb-0">No services selected</p>
                         @endif
                     </div>
                 </div>
@@ -113,33 +141,34 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label class="text-muted small">Name</label>
-                                    <div class="fw-bold">{{ $appointment->client->first_name }} {{ $appointment->client->last_name }}</div>
+                                    <small class="text-muted d-block">Name</small>
+                                    <strong>{{ $appointment->client->first_name }} {{ $appointment->client->last_name }}</strong>
                                 </div>
+                                
                                 <div class="mb-3">
-                                    <label class="text-muted small">Email</label>
-                                    <div>
-                                        <a href="mailto:{{ $appointment->client->email }}" class="text-decoration-none">{{ $appointment->client->email }}</a>
-                                    </div>
+                                    <small class="text-muted d-block">Email</small>
+                                    <a href="mailto:{{ $appointment->client->email }}" class="text-decoration-none">{{ $appointment->client->email }}</a>
                                 </div>
+                                
                                 <div class="mb-3">
-                                    <label class="text-muted small">Phone</label>
-                                    <div>
-                                        @if($appointment->client->phone)
-                                            <a href="tel:{{ $appointment->client->phone }}" class="text-decoration-none">{{ $appointment->client->phone }}</a>
-                                        @else
-                                            <span class="text-muted">Not provided</span>
-                                        @endif
-                                    </div>
+                                    <small class="text-muted d-block">Phone</small>
+                                    @if($appointment->client->phone)
+                                        <a href="tel:{{ $appointment->client->phone }}" class="text-decoration-none">{{ $appointment->client->phone }}</a>
+                                    @else
+                                        <span class="text-muted">Not provided</span>
+                                    @endif
                                 </div>
+                                
                                 @if($appointment->client->full_address)
                                 <div>
-                                    <label class="text-muted small">Address</label>
-                                    <div class="fw-bold">{{ $appointment->client->full_address }}</div>
-                                    <a href="https://maps.google.com/?q={{ urlencode($appointment->client->full_address) }}" 
-                                       target="_blank" class="btn btn-sm btn-outline-primary mt-2">
-                                        <i class="fas fa-map-marker-alt me-1"></i>View on Maps
-                                    </a>
+                                    <small class="text-muted d-block">Address</small>
+                                    <strong>{{ $appointment->client->full_address }}</strong>
+                                    <div class="mt-2">
+                                        <a href="https://maps.google.com/?q={{ urlencode($appointment->client->full_address) }}" 
+                                           target="_blank" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-map-marker-alt me-1"></i>View on Maps
+                                        </a>
+                                    </div>
                                 </div>
                                 @endif
                             </div>
@@ -153,35 +182,40 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label class="text-muted small">Name</label>
-                                    <div class="fw-bold">{{ $appointment->dog->name }}</div>
+                                    <small class="text-muted d-block">Name</small>
+                                    <strong>{{ $appointment->dog->name }}</strong>
                                 </div>
+                                
                                 <div class="mb-3">
-                                    <label class="text-muted small">Breed</label>
-                                    <div class="fw-bold">{{ $appointment->dog->breed ?? 'Unknown' }}</div>
+                                    <small class="text-muted d-block">Breed</small>
+                                    <strong>{{ $appointment->dog->breed ?? 'Unknown' }}</strong>
                                 </div>
+                                
                                 @if($appointment->dog->age)
                                 <div class="mb-3">
-                                    <label class="text-muted small">Age</label>
-                                    <div class="fw-bold">{{ $appointment->dog->age }} years</div>
+                                    <small class="text-muted d-block">Age</small>
+                                    <strong>{{ $appointment->dog->age }} years</strong>
                                 </div>
                                 @endif
+                                
                                 @if($appointment->dog->weight)
                                 <div class="mb-3">
-                                    <label class="text-muted small">Weight</label>
-                                    <div class="fw-bold">{{ $appointment->dog->weight }} lbs</div>
+                                    <small class="text-muted d-block">Weight</small>
+                                    <strong>{{ $appointment->dog->weight }} lbs</strong>
                                 </div>
                                 @endif
+                                
                                 @if($appointment->dog->coat_type)
                                 <div class="mb-3">
-                                    <label class="text-muted small">Coat Type</label>
-                                    <div class="fw-bold">{{ $appointment->dog->coat_type }}</div>
+                                    <small class="text-muted d-block">Coat Type</small>
+                                    <strong>{{ $appointment->dog->coat_type }}</strong>
                                 </div>
                                 @endif
+                                
                                 @if($appointment->dog->gender)
                                 <div>
-                                    <label class="text-muted small">Gender</label>
-                                    <div class="fw-bold">{{ $appointment->dog->gender }}</div>
+                                    <small class="text-muted d-block">Gender</small>
+                                    <strong>{{ $appointment->dog->gender }}</strong>
                                 </div>
                                 @endif
                             </div>
@@ -199,41 +233,54 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="text-muted small">Payment Status</label>
-                            <div>
-                                @php
-                                    $paymentColors = [
-                                        'pending' => 'warning',
-                                        'paid' => 'success',
-                                        'partial' => 'info',
-                                        'refunded' => 'danger'
-                                    ];
-                                @endphp
-                                <span class="badge bg-{{ $paymentColors[$appointment->payment_status] ?? 'secondary' }}">
-                                    {{ ucfirst($appointment->payment_status) }}
-                                </span>
-                            </div>
+                            <small class="text-muted d-block">Payment Status</small>
+                            @php
+                                $paymentColors = [
+                                    'pending' => 'warning',
+                                    'paid' => 'success',
+                                    'partial' => 'info',
+                                    'refunded' => 'danger'
+                                ];
+                            @endphp
+                            <span class="badge bg-{{ $paymentColors[$appointment->payment_status] ?? 'secondary' }}">
+                                {{ ucfirst($appointment->payment_status) }}
+                            </span>
                         </div>
+                        
                         @if($appointment->payment_mode)
                         <div class="mb-3">
-                            <label class="text-muted small">Payment Method</label>
-                            <div class="fw-bold">{{ ucfirst($appointment->payment_mode) }}</div>
+                            <small class="text-muted d-block">Payment Method</small>
+                            <strong>{{ ucfirst($appointment->payment_mode) }}</strong>
                         </div>
                         @endif
+                        
                         @if($appointment->amount_paid > 0)
                         <div class="mb-3">
-                            <label class="text-muted small">Amount Paid</label>
-                            <div class="fw-bold text-success">${{ number_format($appointment->amount_paid, 2) }}</div>
+                            <small class="text-muted d-block">Amount Paid</small>
+                            <strong>${{ number_format($appointment->amount_paid, 2) }}</strong>
                         </div>
                         @endif
+                        
                         @if($appointment->paid_at)
-                        <div>
-                            <label class="text-muted small">Paid On</label>
-                            <div class="fw-bold">{{ $appointment->paid_at->format('M d, Y g:i A') }}</div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Paid On</small>
+                            <strong>{{ $appointment->paid_at->format('M d, Y g:i A') }}</strong>
                         </div>
                         @endif
                     </div>
                 </div>
+
+                <!-- Notes -->
+                @if($appointment->notes)
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Notes</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">{{ $appointment->notes }}</p>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Additional Information -->
                 <div class="card">
@@ -242,24 +289,19 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="text-muted small">Duration</label>
-                            <div class="fw-bold">{{ \Carbon\Carbon::parse($appointment->start_time)->diffInMinutes(\Carbon\Carbon::parse($appointment->end_time)) }} minutes</div>
+                            <small class="text-muted d-block">Created</small>
+                            <strong>{{ $appointment->created_at->format('M d, Y g:i A') }}</strong>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="text-muted small">Created</label>
-                            <div class="fw-bold">{{ $appointment->created_at->format('M d, Y g:i A') }}</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="text-muted small">Last Updated</label>
-                            <div class="fw-bold">{{ $appointment->updated_at->format('M d, Y g:i A') }}</div>
+                            <small class="text-muted d-block">Last Updated</small>
+                            <strong>{{ $appointment->updated_at->format('M d, Y g:i A') }}</strong>
                         </div>
 
                         @if($appointment->subscription)
                         <div>
-                            <label class="text-muted small">Subscription</label>
-                            <div class="fw-bold">{{ $appointment->subscription->subscription_name ?? 'N/A' }}</div>
+                            <small class="text-muted d-block">Subscription</small>
+                            <strong>{{ $appointment->subscription->subscription_name ?? 'N/A' }}</strong>
                         </div>
                         @endif
                     </div>
