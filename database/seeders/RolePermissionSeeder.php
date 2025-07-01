@@ -44,6 +44,12 @@ class RolePermissionSeeder extends Seeder
         Permission::create(['name' => 'edit client']);
         Permission::create(['name' => 'delete client']);
 
+        // Service Permissions
+        Permission::create(['name' => 'view service']);
+        Permission::create(['name' => 'add service']);
+        Permission::create(['name' => 'edit service']);
+        Permission::create(['name' => 'delete service']);
+
         // Appointment Permissions
         $appointmentPermissions = [
             'appointment-access',
@@ -60,8 +66,8 @@ class RolePermissionSeeder extends Seeder
         $roleSuperAdmin->givePermissionTo(Permission::all());
 
         // Admin and User permissions as before
-        $roleAdmin->givePermissionTo(['view dashboard', 'view users', 'add user', 'edit user', 'delete user', 'view roles', 'add role', 'edit role', 'delete role', 'view permissions', 'manage permission', 'view client', 'add client', 'edit client', 'delete client']);
-        $roleUser->givePermissionTo('view dashboard', 'view users', 'view client');
+        $roleAdmin->givePermissionTo(['view dashboard', 'view users', 'add user', 'edit user', 'delete user', 'view roles', 'add role', 'edit role', 'delete role', 'view permissions', 'manage permission', 'view client', 'add client', 'edit client', 'delete client', 'view service', 'add service', 'edit service', 'delete service']);
+        $roleUser->givePermissionTo(['view dashboard', 'view users', 'view client', 'view service']);
 
         // Assign appointment permissions
         $roleSuperAdmin->givePermissionTo($appointmentPermissions);

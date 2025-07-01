@@ -129,6 +129,34 @@
             </div>
         </li>
         @endcanany
+        {{-- Services --}}
+        @canany(['view service', 'add service', 'edit service', 'delete service'])
+        <li class="nav-item {{ request()->is('services*') ? 'active' : '' }}">
+            <a data-bs-toggle="collapse" href="#services" aria-expanded="{{ request()->is('services*') ? 'true' : 'false' }}">
+                <i class="fas fa-concierge-bell"></i>
+                <p>Services</p>
+                <span class="caret"></span>
+            </a>
+            <div class="collapse {{ request()->is('services*') ? 'show' : '' }}" id="services">
+                <ul class="nav nav-collapse">
+                    @can('view service')
+                    <li class="{{ request()->routeIs('services.index') ? 'active' : '' }}">
+                        <a href="{{ route('services.index') }}">
+                        <span class="sub-item">View Services</span>
+                        </a>
+                    </li>
+                    @endcan
+                    @can('add service')
+                    <li class="{{ request()->routeIs('services.create') ? 'active' : '' }}">
+                        <a href="{{ route('services.create') }}">
+                        <span class="sub-item">Add Service</span>
+                        </a>
+                    </li>
+                    @endcan
+                </ul>
+            </div>
+        </li>
+        @endcanany
         {{-- Appointments --}}
         @canany(['appointment-access', 'appointment-create', 'appointment-view', 'appointment-edit', 'appointment-delete'])
         <li class="nav-item {{ request()->is('appointments*') ? 'active' : '' }}">

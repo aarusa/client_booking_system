@@ -9,6 +9,7 @@ use App\Http\Controllers\CMS\UserController;
 use App\Http\Controllers\CMS\RoleController;
 use App\Http\Controllers\CMS\PermissionController;
 use App\Http\Controllers\CMS\ClientController;
+use App\Http\Controllers\CMS\ServiceController;
 use App\Http\Controllers\CMS\AppointmentController;
 
 /*
@@ -88,6 +89,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit')->middleware('permission:edit client');
         Route::put('/{client}', [ClientController::class, 'update'])->name('update')->middleware('permission:edit client');
         Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy')->middleware('permission:delete client');
+    });
+
+    Route::prefix('services')->name('services.')->middleware('auth')->group(function () {
+        Route::get('/', [ServiceController::class, 'index'])->name('index')->middleware('permission:view service');
+        Route::get('/create', [ServiceController::class, 'create'])->name('create')->middleware('permission:add service');
+        Route::post('/', [ServiceController::class, 'store'])->name('store')->middleware('permission:add service');
+        Route::get('/{service}', [ServiceController::class, 'show'])->name('show')->middleware('permission:view service');
+        Route::get('/{service}/edit', [ServiceController::class, 'edit'])->name('edit')->middleware('permission:edit service');
+        Route::put('/{service}', [ServiceController::class, 'update'])->name('update')->middleware('permission:edit service');
+        Route::delete('/{service}', [ServiceController::class, 'destroy'])->name('destroy')->middleware('permission:delete service');
     });
 
     // Other authenticated user routes
