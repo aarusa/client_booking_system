@@ -84,26 +84,4 @@
     
 @endsection
 
-@push('scripts')
-<script>
-    // Check for success message
-    @if (session('success'))
-        swal({
-            title: "Success!",
-            text: "{{ session('success') }}",
-            icon: "success",
-            button: "OK",
-        });
-    @endif
-
-    // Check for error message
-    @if (session('error'))
-        swal({
-            title: "Error!",
-            text: "{{ session('error') }}",
-            icon: "error",
-            button: "OK",
-        });
-    @endif
-</script>
-@endpush 
+{{-- Session messages are now handled centrally in master layout --}} 

@@ -100,16 +100,4 @@
     
 @endsection
 
-@push('scripts')
-<script>
-    // Check for success message
-    @if (session('success'))
-        showAlertOnce('success', "{{ session('success') }}");
-    @endif
-
-    // Check for error message
-    @if (session('error'))
-        showAlertOnce('error', "{{ session('error') }}");
-    @endif
-</script>
-@endpush 
+{{-- Session messages are now handled centrally in master layout --}} 

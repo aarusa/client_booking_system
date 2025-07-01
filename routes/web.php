@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\CMS\Auth\LoginController;
 use App\Http\Controllers\CMS\Auth\RegisterController;
 use App\Http\Controllers\CMS\DashboardController;
@@ -92,6 +93,8 @@ Route::middleware('auth')->group(function () {
     // Other authenticated user routes
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    
+    // Session messages are now handled centrally in master layout
 
     // Appointment Management
     Route::middleware(['auth', 'can:appointment-access'])->prefix('appointments')->name('appointments.')->group(function () {

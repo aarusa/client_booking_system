@@ -26,74 +26,64 @@
             <div class="col-md-12">
                 <!-- Filters and Sort Section -->
                 <div class="card mb-4">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Search & Filter</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="GET" action="{{ route('clients.index') }}" id="filterForm">
-                            <!-- Search Row -->
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-4">
-                                    <label for="name_search" class="form-label">Search Name</label>
-                                    <input type="text" class="form-control" id="name_search" name="name_search" 
-                                           placeholder="First name, last name..." value="{{ request('name_search') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="email_search" class="form-label">Search Email</label>
-                                    <input type="text" class="form-control" id="email_search" name="email_search" 
-                                           placeholder="Email address..." value="{{ request('email_search') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="location_search" class="form-label">Search Location</label>
-                                    <input type="text" class="form-control" id="location_search" name="location_search" 
-                                           placeholder="City, state, or address..." value="{{ request('location_search') }}">
-                                </div>
-                            </div>
-
-                            <!-- Filter Row -->
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-4">
-                                    <label for="dog_name_search" class="form-label">Search Dog Name</label>
-                                    <input type="text" class="form-control" id="dog_name_search" name="dog_name_search" 
-                                           placeholder="Dog name..." value="{{ request('dog_name_search') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="dog_breed_search" class="form-label">Search Dog Breed</label>
-                                    <input type="text" class="form-control" id="dog_breed_search" name="dog_breed_search" 
-                                           placeholder="Dog breed..." value="{{ request('dog_breed_search') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="sort" class="form-label">Sort By</label>
-                                    <select class="form-select" id="sort" name="sort">
-                                        <option value="created_desc" {{ request('sort', 'created_desc') == 'created_desc' ? 'selected' : '' }}>Newest First</option>
-                                        <option value="created_asc" {{ request('sort') == 'created_asc' ? 'selected' : '' }}>Oldest First</option>
-                                        <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Name (A-Z)</option>
-                                        <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Name (Z-A)</option>
-                                        <option value="email_asc" {{ request('sort') == 'email_asc' ? 'selected' : '' }}>Email (A-Z)</option>
-                                        <option value="email_desc" {{ request('sort') == 'email_desc' ? 'selected' : '' }}>Email (Z-A)</option>
-                                        <option value="dogs_desc" {{ request('sort') == 'dogs_desc' ? 'selected' : '' }}>Most Dogs First</option>
-                                        <option value="dogs_asc" {{ request('sort') == 'dogs_asc' ? 'selected' : '' }}>Least Dogs First</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="d-flex gap-2 align-items-center">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search me-2"></i>Search
-                                </button>
-                                <a href="{{ route('clients.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-2"></i>Clear
-                                </a>
-                                @if(request()->hasAny(['name_search', 'email_search', 'location_search', 'dog_name_search', 'dog_breed_search', 'sort']))
-                                    <span class="badge bg-info">
-                                        {{ $clients->count() }} client(s) found
-                                    </span>
-                                @endif
-                            </div>
-                        </form>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="openFilterSidebar">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
                     </div>
                 </div>
+                <!-- Filter Sidebar -->
+                <div id="filterSidebar" class="filter-sidebar">
+                    <div class="filter-sidebar-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Filters</h5>
+                        <button type="button" class="btn-close" aria-label="Close" id="closeFilterSidebar"></button>
+                    </div>
+                    <form method="GET" action="{{ route('clients.index') }}" id="filterForm" class="p-3">
+                        <div class="mb-3">
+                            <label for="name_search" class="form-label">Search Name</label>
+                            <input type="text" class="form-control" id="name_search" name="name_search" placeholder="First name, last name..." value="{{ request('name_search') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email_search" class="form-label">Search Email</label>
+                            <input type="text" class="form-control" id="email_search" name="email_search" placeholder="Email address..." value="{{ request('email_search') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="location_search" class="form-label">Search Location</label>
+                            <input type="text" class="form-control" id="location_search" name="location_search" placeholder="City, state, or address..." value="{{ request('location_search') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dog_name_search" class="form-label">Search Dog Name</label>
+                            <input type="text" class="form-control" id="dog_name_search" name="dog_name_search" placeholder="Dog name..." value="{{ request('dog_name_search') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dog_breed_search" class="form-label">Search Dog Breed</label>
+                            <input type="text" class="form-control" id="dog_breed_search" name="dog_breed_search" placeholder="Dog breed..." value="{{ request('dog_breed_search') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select class="form-select" id="sort" name="sort">
+                                <option value="created_desc" {{ request('sort', 'created_desc') == 'created_desc' ? 'selected' : '' }}>Newest First</option>
+                                <option value="created_asc" {{ request('sort') == 'created_asc' ? 'selected' : '' }}>Oldest First</option>
+                                <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Name (A-Z)</option>
+                                <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Name (Z-A)</option>
+                                <option value="email_asc" {{ request('sort') == 'email_asc' ? 'selected' : '' }}>Email (A-Z)</option>
+                                <option value="email_desc" {{ request('sort') == 'email_desc' ? 'selected' : '' }}>Email (Z-A)</option>
+                                <option value="dogs_desc" {{ request('sort') == 'dogs_desc' ? 'selected' : '' }}>Most Dogs First</option>
+                                <option value="dogs_asc" {{ request('sort') == 'dogs_asc' ? 'selected' : '' }}>Least Dogs First</option>
+                            </select>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center mt-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                            <a href="{{ route('clients.index') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times me-2"></i>Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div id="filterSidebarOverlay" class="filter-sidebar-overlay"></div>
 
                 <!-- Clients Table -->
                 <div class="card">
@@ -172,25 +162,7 @@
 
 @push('scripts')
   <script>
-      // Check for success message
-      @if (session('success'))
-          swal({
-              title: "Success!",
-              text: "{{ session('success') }}",
-              icon: "success",
-              button: "OK",
-          });
-      @endif
-
-      // Check for error message
-      @if (session('error'))
-          swal({
-              title: "Error!",
-              text: "{{ session('error') }}",
-              icon: "error",
-              button: "OK",
-          });
-      @endif
+      // Session messages are now handled centrally in master layout
 
       // SweetAlert confirmation for delete client
       $(document).on('click', '.delete-client-btn', function(e) {
@@ -223,5 +195,73 @@
               }
           });
       });
+
+      // Sidebar filter logic
+      document.addEventListener('DOMContentLoaded', function() {
+          var sidebar = document.getElementById('filterSidebar');
+          var overlay = document.getElementById('filterSidebarOverlay');
+          var openBtn = document.getElementById('openFilterSidebar');
+          var closeBtn = document.getElementById('closeFilterSidebar');
+          if (openBtn && sidebar && overlay && closeBtn) {
+              openBtn.addEventListener('click', function() {
+                  sidebar.classList.add('active');
+                  overlay.classList.add('active');
+              });
+              closeBtn.addEventListener('click', function() {
+                  sidebar.classList.remove('active');
+                  overlay.classList.remove('active');
+              });
+              overlay.addEventListener('click', function() {
+                  sidebar.classList.remove('active');
+                  overlay.classList.remove('active');
+              });
+          }
+      });
   </script>
-@endpush 
+@endpush
+
+<style>
+.filter-sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 350px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 16px rgba(0,0,0,0.08);
+    z-index: 1050;
+    transition: right 0.3s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto;
+    border-left: 1px solid #e9ecef;
+}
+.filter-sidebar.active {
+    right: 0;
+}
+.filter-sidebar-header {
+    padding: 1rem 1.5rem 0.5rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+.filter-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.15);
+    z-index: 1049;
+    display: none;
+}
+.filter-sidebar-overlay.active {
+    display: block;
+}
+@media (max-width: 600px) {
+    .filter-sidebar {
+        width: 100vw;
+        right: -100vw;
+    }
+    .filter-sidebar.active {
+        right: 0;
+    }
+}
+</style> 

@@ -34,14 +34,47 @@
     @include('cms.layouts.partials.scripts')
 
     <script>
-    @if(session('error'))
-        swal({
-            icon: 'error',
-            title: 'No Permission',
-            text: "{{ session('error') }}",
-            button: 'OK'
-        });
-    @endif
+    $(document).ready(function() {
+        @if(session('error'))
+            swal({
+                icon: 'error',
+                title: 'Error',
+                text: "{{ session('error') }}",
+                button: 'OK'
+            });
+        @php session()->forget('error'); @endphp
+        @endif
+
+        @if(session('success'))
+            swal({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                button: 'OK'
+            });
+        @php session()->forget('success'); @endphp
+        @endif
+
+        @if(session('warning'))
+            swal({
+                icon: 'warning',
+                title: 'Warning',
+                text: "{{ session('warning') }}",
+                button: 'OK'
+            });
+        @php session()->forget('warning'); @endphp
+        @endif
+
+        @if(session('info'))
+            swal({
+                icon: 'info',
+                title: 'Information',
+                text: "{{ session('info') }}",
+                button: 'OK'
+            });
+        @php session()->forget('info'); @endphp
+        @endif
+    });
     </script>
 
   </body>

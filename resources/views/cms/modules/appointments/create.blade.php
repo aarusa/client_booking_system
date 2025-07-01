@@ -26,7 +26,7 @@
                                         <select name="client_id" id="client_id" class="form-control @error('client_id') is-invalid @enderror" required>
                                             <option value="">Select Client</option>
                                             @foreach($clients as $client)
-                                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                                                <option value="{{ $client->id }}" {{ old('client_id', $selectedClientId ?? '') == $client->id ? 'selected' : '' }}>
                                                     {{ $client->first_name }} {{ $client->last_name }} ({{ $client->email }})
                                                 </option>
                                             @endforeach
@@ -82,6 +82,10 @@
                                         <input type="time" name="end_time" id="end_time" 
                                                class="form-control @error('end_time') is-invalid @enderror" 
                                                value="{{ old('end_time') }}" required>
+                                        <small class="text-muted">
+                                            <i class="fas fa-magic me-1"></i>
+                                            Auto-calculated based on selected services
+                                        </small>
                                         @error('end_time')
                                             <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                         @enderror
@@ -273,23 +277,39 @@
         $(document).ready(function() {
             // Load dogs when client is selected
             $('#client_id').change(function() {
-                const clientId = $(this).val();
+                loadClientDogs($(this).val());
+            });
+
+            // Load dogs for pre-selected client on page load
+            const preSelectedClientId = $('#client_id').val();
+            if (preSelectedClientId) {
+                loadClientDogs(preSelectedClientId);
+            }
+
+            function loadClientDogs(clientId) {
                 const dogSelect = $('#dog_id');
+                const oldDogId = '{{ old("dog_id") }}';
                 
                 dogSelect.html('<option value="">Select Dog</option>');
                 
                 if (clientId) {
                     $.get(`/appointments/client/${clientId}/dogs`, function(data) {
                         data.forEach(function(dog) {
-                            dogSelect.append(`<option value="${dog.id}" data-size="${dog.size || 'medium'}">${dog.name} (${dog.breed || 'Unknown breed'}) - ${dog.size || 'Medium'} size</option>`);
+                            const isSelected = oldDogId && oldDogId == dog.id ? 'selected' : '';
+                            dogSelect.append(`<option value="${dog.id}" data-size="${dog.size || 'medium'}" ${isSelected}>${dog.name} (${dog.breed || 'Unknown breed'}) - ${dog.size || 'Medium'} size</option>`);
                         });
+                        
+                        // If there's an old dog selection, trigger the change event to load prices
+                        if (oldDogId) {
+                            $('#dog_id').trigger('change');
+                        }
                     });
                 }
                 
                 // Reset pricing when client changes
                 $('.service-price').text('$0.00');
                 calculateTotals();
-            });
+            }
 
             // Load service prices when dog is selected
             $('#dog_id').change(function() {
@@ -317,6 +337,12 @@
             // Calculate total price when services are selected
             $('.service-checkbox').change(function() {
                 calculateTotals();
+                updateEndTime();
+            });
+
+            // Update end time when start time changes
+            $('#start_time').change(function() {
+                updateEndTime();
             });
 
             function calculateTotals() {
@@ -347,6 +373,38 @@
                 } else {
                     servicesDiv.html('<p class="text-muted mb-0">No services selected</p>');
                 }
+            }
+
+            function updateEndTime() {
+                const startTime = $('#start_time').val();
+                const appointmentDate = $('#appointment_date').val();
+                
+                if (!startTime || !appointmentDate) {
+                    $('#end_time').val('');
+                    return;
+                }
+
+                // Calculate total duration from selected services
+                let totalDuration = 0;
+                $('.service-checkbox:checked').each(function() {
+                    totalDuration += parseInt($(this).data('duration'));
+                });
+
+                if (totalDuration === 0) {
+                    $('#end_time').val('');
+                    return;
+                }
+
+                // Create a Date object from start time and appointment date
+                const startDateTime = new Date(appointmentDate + 'T' + startTime);
+                
+                // Add the total duration in minutes
+                const endDateTime = new Date(startDateTime.getTime() + (totalDuration * 60 * 1000));
+                
+                // Format the end time as HH:MM
+                const endTime = endDateTime.toTimeString().slice(0, 5);
+                
+                $('#end_time').val(endTime);
             }
 
             // Initialize totals

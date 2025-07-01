@@ -21,79 +21,67 @@
         
         <div class="row">
             <div class="col-md-12">
+
                 <!-- Filters and Sort Section -->
                 <div class="card mb-4">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Search & Filter</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="GET" action="{{ route('appointments.index') }}" id="filterForm">
-                            <!-- Search Row -->
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-4">
-                                    <label for="client_search" class="form-label">Search Client</label>
-                                    <input type="text" class="form-control" id="client_search" name="client_search" 
-                                           placeholder="Name or email..." value="{{ request('client_search') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="location_search" class="form-label">Search Location</label>
-                                    <input type="text" class="form-control" id="location_search" name="location_search" 
-                                           placeholder="City, state, or address..." value="{{ request('location_search') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-select" id="status" name="status">
-                                        <option value="">All Status</option>
-                                        <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                                        <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Date Range Row -->
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-4">
-                                    <label for="date_from" class="form-label">From Date</label>
-                                    <input type="date" class="form-control" id="date_from" name="date_from" 
-                                           value="{{ request('date_from') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="date_to" class="form-label">To Date</label>
-                                    <input type="date" class="form-control" id="date_to" name="date_to" 
-                                           value="{{ request('date_to') }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="sort" class="form-label">Sort By</label>
-                                    <select class="form-select" id="sort" name="sort">
-                                        <option value="date_desc" {{ request('sort') == 'date_desc' ? 'selected' : '' }}>Date (Newest First)</option>
-                                        <option value="date_asc" {{ request('sort') == 'date_asc' ? 'selected' : '' }}>Date (Oldest First)</option>
-                                        <option value="client_asc" {{ request('sort') == 'client_asc' ? 'selected' : '' }}>Client Name (A-Z)</option>
-                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Price (High to Low)</option>
-                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price (Low to High)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="d-flex gap-2 align-items-center">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search me-2"></i>Search
-                                </button>
-                                <a href="{{ route('appointments.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-2"></i>Clear
-                                </a>
-                                @if(request()->hasAny(['date_from', 'date_to', 'status', 'client_search', 'location_search', 'sort']))
-                                    <span class="badge bg-info">
-                                        {{ $appointments->count() }} appointment(s) found
-                                    </span>
-                                @endif
-                            </div>
-                        </form>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="openFilterSidebar">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
                     </div>
                 </div>
+                <!-- Filter Sidebar -->
+                <div id="filterSidebar" class="filter-sidebar">
+                    <div class="filter-sidebar-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Filters</h5>
+                        <button type="button" class="btn-close" aria-label="Close" id="closeFilterSidebar"></button>
+                    </div>
+                    <form method="GET" action="{{ route('appointments.index') }}" id="filterForm" class="p-3">
+                        <div class="mb-3">
+                            <label for="client_search" class="form-label">Search Client</label>
+                            <input type="text" class="form-control" id="client_search" name="client_search" placeholder="Name or email..." value="{{ request('client_search') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="location_search" class="form-label">Search Location</label>
+                            <input type="text" class="form-control" id="location_search" name="location_search" placeholder="City, state, or address..." value="{{ request('location_search') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Status</option>
+                                <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                                <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="appointment_date" class="form-label">Appointment Date</label>
+                            <input type="date" class="form-control" id="appointment_date" name="appointment_date" value="{{ request('appointment_date') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select class="form-select" id="sort" name="sort">
+                                <option value="date_desc" {{ request('sort') == 'date_desc' ? 'selected' : '' }}>Date (Newest First)</option>
+                                <option value="date_asc" {{ request('sort') == 'date_asc' ? 'selected' : '' }}>Date (Oldest First)</option>
+                                <option value="client_asc" {{ request('sort') == 'client_asc' ? 'selected' : '' }}>Client Name (A-Z)</option>
+                                <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Price (High to Low)</option>
+                                <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Price (Low to High)</option>
+                            </select>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center mt-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                            <a href="{{ route('appointments.index') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times me-2"></i>Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div id="filterSidebarOverlay" class="filter-sidebar-overlay"></div>
 
                 <!-- Appointments Table -->
                 <div class="card">
@@ -345,28 +333,54 @@
                 justify-content: center;
             }
         }
+
+        .filter-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -2px 0 16px rgba(0,0,0,0.08);
+            z-index: 1050;
+            transition: right 0.3s cubic-bezier(.4,0,.2,1);
+            overflow-y: auto;
+            border-left: 1px solid #e9ecef;
+        }
+        .filter-sidebar.active {
+            right: 0;
+        }
+        .filter-sidebar-header {
+            padding: 1rem 1.5rem 0.5rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+        .filter-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.15);
+            z-index: 1049;
+            display: none;
+        }
+        .filter-sidebar-overlay.active {
+            display: block;
+        }
+        @media (max-width: 600px) {
+            .filter-sidebar {
+                width: 100vw;
+                right: -100vw;
+            }
+            .filter-sidebar.active {
+                right: 0;
+            }
+        }
     </style>
     
     <script>
-        // Check for success message
-        @if (session('success'))
-            swal({
-                title: "Success!",
-                text: "{{ session('success') }}",
-                icon: "success",
-                button: "OK",
-            });
-        @endif
-
-        // Check for error message
-        @if (session('error'))
-            swal({
-                title: "Error!",
-                text: "{{ session('error') }}",
-                icon: "error",
-                button: "OK",
-            });
-        @endif
+        // Session messages are now handled centrally in master layout
 
         // SweetAlert confirmation for delete appointment
         $(document).on('click', '.delete-appointment-btn', function(e) {
@@ -467,6 +481,28 @@
                     $('.status-select[data-appointment-id="' + appointmentId + '"]').prop('disabled', false);
                 }
             });
+        });
+
+        // Sidebar filter logic
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebar = document.getElementById('filterSidebar');
+            var overlay = document.getElementById('filterSidebarOverlay');
+            var openBtn = document.getElementById('openFilterSidebar');
+            var closeBtn = document.getElementById('closeFilterSidebar');
+            if (openBtn && sidebar && overlay && closeBtn) {
+                openBtn.addEventListener('click', function() {
+                    sidebar.classList.add('active');
+                    overlay.classList.add('active');
+                });
+                closeBtn.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
         });
     </script>
 @endpush 

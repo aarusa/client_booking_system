@@ -21,12 +21,17 @@ class AppointmentController extends Controller
     {
         $query = Appointment::with(['client', 'dog', 'services']);
 
-        // Date range filter
-        if ($request->filled('date_from')) {
-            $query->where('appointment_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->where('appointment_date', '<=', $request->date_to);
+        // Single date filter
+        if ($request->filled('appointment_date')) {
+            $query->where('appointment_date', $request->appointment_date);
+        } else {
+            // Date range filter
+            if ($request->filled('date_from')) {
+                $query->where('appointment_date', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->where('appointment_date', '<=', $request->date_to);
+            }
         }
 
         // Status filter
@@ -93,11 +98,12 @@ class AppointmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
         $clients = Client::with('dogs')->get();
+        $selectedClientId = $request->get('client_id');
         
-        return view('cms.modules.appointments.create', compact('clients'));
+        return view('cms.modules.appointments.create', compact('clients', 'selectedClientId'));
     }
 
     /**

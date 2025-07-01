@@ -22,7 +22,8 @@ class Appointment extends Model
         'payment_status',
         'payment_mode',
         'amount_paid',
-        'paid_at'
+        'paid_at',
+        'services_data'
     ];
 
     protected $casts = [
