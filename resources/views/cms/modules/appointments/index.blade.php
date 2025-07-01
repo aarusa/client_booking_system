@@ -38,6 +38,7 @@
                         <button type="button" class="btn-close" aria-label="Close" id="closeFilterSidebar"></button>
                     </div>
                     <form method="GET" action="{{ route('appointments.index') }}" id="filterForm" class="p-3">
+                        <input type="hidden" name="tab" value="{{ $activeTab }}">
                         <div class="mb-3">
                             <label for="client_search" class="form-label">Search Client</label>
                             <input type="text" class="form-control" id="client_search" name="client_search" placeholder="Name or email..." value="{{ request('client_search') }}">
@@ -83,10 +84,86 @@
                 </div>
                 <div id="filterSidebarOverlay" class="filter-sidebar-overlay"></div>
 
+                <!-- Status Tabs -->
+                <div class="card mb-4">
+                    <div class="card-body p-0">
+                        <ul class="nav nav-tabs nav-tabs-primary" id="appointmentTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link {{ $activeTab === 'all' ? 'active' : '' }}" 
+                                   href="{{ route('appointments.index', array_merge(request()->query(), ['tab' => 'all'])) }}" 
+                                   role="tab">
+                                    <i class="fas fa-list me-2"></i>All
+                                    <span class="badge bg-secondary ms-2">{{ $statusCounts['all'] }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link {{ $activeTab === 'scheduled' ? 'active' : '' }}" 
+                                   href="{{ route('appointments.index', array_merge(request()->query(), ['tab' => 'scheduled'])) }}" 
+                                   role="tab">
+                                    <i class="fas fa-calendar me-2"></i>Scheduled
+                                    <span class="badge bg-warning ms-2">{{ $statusCounts['scheduled'] }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link {{ $activeTab === 'confirmed' ? 'active' : '' }}" 
+                                   href="{{ route('appointments.index', array_merge(request()->query(), ['tab' => 'confirmed'])) }}" 
+                                   role="tab">
+                                    <i class="fas fa-check-circle me-2"></i>Confirmed
+                                    <span class="badge bg-info ms-2">{{ $statusCounts['confirmed'] }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link {{ $activeTab === 'in_progress' ? 'active' : '' }}" 
+                                   href="{{ route('appointments.index', array_merge(request()->query(), ['tab' => 'in_progress'])) }}" 
+                                   role="tab">
+                                    <i class="fas fa-spinner me-2"></i>In Progress
+                                    <span class="badge bg-primary ms-2">{{ $statusCounts['in_progress'] }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link {{ $activeTab === 'completed' ? 'active' : '' }}" 
+                                   href="{{ route('appointments.index', array_merge(request()->query(), ['tab' => 'completed'])) }}" 
+                                   role="tab">
+                                    <i class="fas fa-check-double me-2"></i>Completed
+                                    <span class="badge bg-success ms-2">{{ $statusCounts['completed'] }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link {{ $activeTab === 'cancelled' ? 'active' : '' }}" 
+                                   href="{{ route('appointments.index', array_merge(request()->query(), ['tab' => 'cancelled'])) }}" 
+                                   role="tab">
+                                    <i class="fas fa-times-circle me-2"></i>Cancelled
+                                    <span class="badge bg-danger ms-2">{{ $statusCounts['cancelled'] }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
                 <!-- Appointments Table -->
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">All Appointments</div>
+                        <div class="card-title">
+                            @switch($activeTab)
+                                @case('scheduled')
+                                    Scheduled Appointments
+                                    @break
+                                @case('confirmed')
+                                    Confirmed Appointments
+                                    @break
+                                @case('in_progress')
+                                    In Progress Appointments
+                                    @break
+                                @case('completed')
+                                    Completed Appointments
+                                    @break
+                                @case('cancelled')
+                                    Cancelled Appointments
+                                    @break
+                                @default
+                                    All Appointments
+                            @endswitch
+                        </div>
                     </div>
                     <div class="card-body">
                         <table class="table table-hover">
@@ -375,6 +452,76 @@
             }
             .filter-sidebar.active {
                 right: 0;
+            }
+        }
+
+        /* Tab Styling */
+        .nav-tabs-primary {
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .nav-tabs-primary .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tabs-primary .nav-link:hover {
+            border-color: transparent;
+            color: #007bff;
+            background-color: #f8f9fa;
+        }
+
+        .nav-tabs-primary .nav-link.active {
+            color: #007bff;
+            background-color: #fff;
+            border-bottom-color: #007bff;
+            font-weight: 600;
+        }
+
+        .nav-tabs-primary .nav-link .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Responsive tabs */
+        @media (max-width: 768px) {
+            .nav-tabs-primary {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-tabs-primary .nav-item {
+                flex: 0 0 auto;
+                min-width: 120px;
+            }
+
+            .nav-tabs-primary .nav-link {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+                white-space: nowrap;
+            }
+
+            .nav-tabs-primary .nav-link i {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav-tabs-primary .nav-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .nav-tabs-primary .nav-link .badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
             }
         }
     </style>

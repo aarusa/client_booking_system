@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AppointmentController::class, 'index'])->name('index');
         Route::get('/create', [AppointmentController::class, 'create'])->name('create');
         Route::post('/', [AppointmentController::class, 'store'])->name('store');
+
         // AJAX: Get dogs for a client
         Route::get('/client/{client}/dogs', [AppointmentController::class, 'getClientDogs'])->name('client.dogs');
         // AJAX: Get service prices for dog size

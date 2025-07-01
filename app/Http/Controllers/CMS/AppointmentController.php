@@ -19,7 +19,16 @@ class AppointmentController extends Controller
      */
     public function index(Request $request)
     {
+        // Get the active tab from request, default to 'all'
+        $activeTab = $request->get('tab', 'all');
+        
+        // Base query
         $query = Appointment::with(['client', 'dog', 'services']);
+
+        // Apply status filter based on active tab
+        if ($activeTab !== 'all') {
+            $query->where('status', $activeTab);
+        }
 
         // Single date filter
         if ($request->filled('appointment_date')) {
@@ -34,8 +43,8 @@ class AppointmentController extends Controller
             }
         }
 
-        // Status filter
-        if ($request->filled('status')) {
+        // Additional status filter (for when not using tabs)
+        if ($request->filled('status') && $activeTab === 'all') {
             $query->where('status', $request->status);
         }
 
@@ -90,7 +99,17 @@ class AppointmentController extends Controller
 
         $appointments = $query->paginate(10);
         
-        return view('cms.modules.appointments.index', compact('appointments'));
+        // Get counts for each status for the tabs
+        $statusCounts = [
+            'all' => Appointment::count(),
+            'scheduled' => Appointment::where('status', 'scheduled')->count(),
+            'confirmed' => Appointment::where('status', 'confirmed')->count(),
+            'in_progress' => Appointment::where('status', 'in_progress')->count(),
+            'completed' => Appointment::where('status', 'completed')->count(),
+            'cancelled' => Appointment::where('status', 'cancelled')->count(),
+        ];
+        
+        return view('cms.modules.appointments.index', compact('appointments', 'activeTab', 'statusCounts'));
     }
 
     /**
@@ -570,4 +589,5 @@ class AppointmentController extends Controller
 
         return response()->json($prices);
     }
+
 }
