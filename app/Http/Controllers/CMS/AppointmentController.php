@@ -121,8 +121,9 @@ class AppointmentController extends Controller
     {
         $clients = Client::with('dogs')->get();
         $selectedClientId = $request->get('client_id');
+        $services = Service::where('is_active', true)->with('prices')->get();
         
-        return view('cms.modules.appointments.create', compact('clients', 'selectedClientId'));
+        return view('cms.modules.appointments.create', compact('clients', 'selectedClientId', 'services'));
     }
 
     /**
@@ -140,7 +141,7 @@ class AppointmentController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'services' => 'required|array|min:1',
-            'services.*' => 'integer|between:1,6',
+            'services.*' => 'integer|exists:services,id',
             'notes' => 'nullable|string',
             'payment_status' => 'nullable|in:pending,paid,partial,refunded',
             'payment_mode' => 'nullable|in:cash,payid,card,bank_transfer',
@@ -162,7 +163,7 @@ class AppointmentController extends Controller
             'services.array' => 'Services must be selected.',
             'services.min' => 'Please select at least one service.',
             'services.*.integer' => 'Invalid service selected.',
-            'services.*.between' => 'Invalid service selected.',
+            'services.*.exists' => 'Selected service does not exist.',
             'payment_status.in' => 'Invalid payment status selected.',
             'payment_mode.in' => 'Invalid payment mode selected.',
             'amount_paid.numeric' => 'Amount paid must be a valid number.',
@@ -195,55 +196,12 @@ class AppointmentController extends Controller
             return back()->withErrors(['scheduling' => 'This time slot conflicts with an existing appointment.'])->withInput();
         }
 
-        // Define services with variable pricing based on dog size
-        $services = [
-            1 => ['name' => 'Basic Grooming'],
-            2 => ['name' => 'Full Grooming'],
-            3 => ['name' => 'Nail Trim'],
-            4 => ['name' => 'Ear Cleaning'],
-            5 => ['name' => 'De-shedding Treatment'],
-            6 => ['name' => 'Puppy Grooming'],
-        ];
-
         // Get the dog to determine size for pricing
         $dog = Dog::find($request->dog_id);
         $dogSize = $dog->size ?? 'medium'; // Default to medium if size not set
 
-        // Define pricing based on dog size
-        $pricing = [
-            'small' => [
-                1 => 35.00, // Basic Grooming
-                2 => 60.00, // Full Grooming
-                3 => 12.00, // Nail Trim
-                4 => 10.00, // Ear Cleaning
-                5 => 30.00, // De-shedding Treatment
-                6 => 25.00, // Puppy Grooming
-            ],
-            'medium' => [
-                1 => 45.00, // Basic Grooming
-                2 => 75.00, // Full Grooming
-                3 => 15.00, // Nail Trim
-                4 => 12.00, // Ear Cleaning
-                5 => 40.00, // De-shedding Treatment
-                6 => 35.00, // Puppy Grooming
-            ],
-            'large' => [
-                1 => 55.00, // Basic Grooming
-                2 => 90.00, // Full Grooming
-                3 => 18.00, // Nail Trim
-                4 => 15.00, // Ear Cleaning
-                5 => 50.00, // De-shedding Treatment
-                6 => 45.00, // Puppy Grooming
-            ],
-            'extra_large' => [
-                1 => 65.00, // Basic Grooming
-                2 => 110.00, // Full Grooming
-                3 => 20.00, // Nail Trim
-                4 => 18.00, // Ear Cleaning
-                5 => 60.00, // De-shedding Treatment
-                6 => 55.00, // Puppy Grooming
-            ],
-        ];
+        // Get services from database
+        $services = Service::whereIn('id', $request->services)->with('prices')->get();
 
         $appointment = new Appointment();
         $appointment->client_id = $request->client_id;
@@ -263,16 +221,14 @@ class AppointmentController extends Controller
         // Calculate total price based on dog size
         $totalPrice = 0;
         $selectedServices = [];
-        foreach ($request->services as $serviceId) {
-            if (isset($pricing[$dogSize][$serviceId])) {
-                $price = $pricing[$dogSize][$serviceId];
-                $totalPrice += $price;
-                $selectedServices[] = [
-                    'id' => $serviceId,
-                    'name' => $services[$serviceId]['name'],
-                    'price' => $price
-                ];
-            }
+        foreach ($services as $service) {
+            $price = $service->getPriceForSize($dogSize) ?? 0;
+            $totalPrice += $price;
+            $selectedServices[] = [
+                'id' => $service->id,
+                'name' => $service->name,
+                'price' => $price
+            ];
         }
         $appointment->total_price = $totalPrice;
 
@@ -306,8 +262,9 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::with(['client', 'dog'])->findOrFail($id);
         $clients = Client::with('dogs')->get();
+        $services = Service::where('is_active', true)->with('prices')->get();
         
-        return view('cms.modules.appointments.edit', compact('appointment', 'clients'));
+        return view('cms.modules.appointments.edit', compact('appointment', 'clients', 'services'));
     }
 
     /**
@@ -327,7 +284,7 @@ class AppointmentController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
             'status' => 'required|in:scheduled,confirmed,in_progress,completed,cancelled',
             'services' => 'required|array|min:1',
-            'services.*' => 'integer|between:1,6',
+            'services.*' => 'integer|exists:services,id',
             'notes' => 'nullable|string',
             'payment_status' => 'nullable|in:pending,paid,partial,refunded',
             'payment_mode' => 'nullable|in:cash,payid,card,bank_transfer',
@@ -350,7 +307,7 @@ class AppointmentController extends Controller
             'services.array' => 'Services must be selected.',
             'services.min' => 'Please select at least one service.',
             'services.*.integer' => 'Invalid service selected.',
-            'services.*.between' => 'Invalid service selected.',
+            'services.*.exists' => 'Selected service does not exist.',
             'payment_status.in' => 'Invalid payment status selected.',
             'payment_mode.in' => 'Invalid payment mode selected.',
             'amount_paid.numeric' => 'Amount paid must be a valid number.',
@@ -453,16 +410,14 @@ class AppointmentController extends Controller
         // Calculate total price based on dog size
         $totalPrice = 0;
         $selectedServices = [];
-        foreach ($request->services as $serviceId) {
-            if (isset($pricing[$dogSize][$serviceId])) {
-                $price = $pricing[$dogSize][$serviceId];
-                $totalPrice += $price;
-                $selectedServices[] = [
-                    'id' => $serviceId,
-                    'name' => $services[$serviceId]['name'],
-                    'price' => $price
-                ];
-            }
+        foreach ($services as $service) {
+            $price = $service->getPriceForSize($dogSize) ?? 0;
+            $totalPrice += $price;
+            $selectedServices[] = [
+                'id' => $service->id,
+                'name' => $service->name,
+                'price' => $price
+            ];
         }
         $appointment->total_price = $totalPrice;
 
@@ -543,48 +498,22 @@ class AppointmentController extends Controller
             return response()->json(['error' => 'Invalid dog size'], 400);
         }
 
-        // Define pricing based on dog size
-        $pricing = [
-            'small' => [
-                1 => 35.00, // Basic Grooming
-                2 => 60.00, // Full Grooming
-                3 => 12.00, // Nail Trim
-                4 => 10.00, // Ear Cleaning
-                5 => 30.00, // De-shedding Treatment
-                6 => 25.00, // Puppy Grooming
-            ],
-            'medium' => [
-                1 => 45.00, // Basic Grooming
-                2 => 75.00, // Full Grooming
-                3 => 15.00, // Nail Trim
-                4 => 12.00, // Ear Cleaning
-                5 => 40.00, // De-shedding Treatment
-                6 => 35.00, // Puppy Grooming
-            ],
-            'large' => [
-                1 => 55.00, // Basic Grooming
-                2 => 90.00, // Full Grooming
-                3 => 18.00, // Nail Trim
-                4 => 15.00, // Ear Cleaning
-                5 => 50.00, // De-shedding Treatment
-                6 => 45.00, // Puppy Grooming
-            ],
-            'extra_large' => [
-                1 => 65.00, // Basic Grooming
-                2 => 110.00, // Full Grooming
-                3 => 20.00, // Nail Trim
-                4 => 18.00, // Ear Cleaning
-                5 => 60.00, // De-shedding Treatment
-                6 => 55.00, // Puppy Grooming
-            ],
-        ];
+        // Get all active services with their prices for the specified dog size
+        $services = Service::where('is_active', true)
+                          ->with(['prices' => function($query) use ($dogSize) {
+                              $query->where('dog_size', $dogSize);
+                          }])
+                          ->get();
 
         $prices = [];
-        foreach ($pricing[$dogSize] as $serviceId => $price) {
-            $prices[] = [
-                'service_id' => $serviceId,
-                'price' => $price
-            ];
+        foreach ($services as $service) {
+            $price = $service->prices->first();
+            if ($price) {
+                $prices[] = [
+                    'service_id' => $service->id,
+                    'price' => $price->price
+                ];
+            }
         }
 
         return response()->json($prices);

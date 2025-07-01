@@ -125,20 +125,9 @@
                                 
                                 <div class="border rounded">
                                     @php
-                                        $services = [
-                                            ['id' => 1, 'name' => 'Basic Grooming', 'description' => 'Bath, brush, nail trim, and basic styling', 'duration' => 60],
-                                            ['id' => 2, 'name' => 'Full Grooming', 'description' => 'Complete grooming including haircut, bath, brush, nail trim, and styling', 'duration' => 90],
-                                            ['id' => 3, 'name' => 'Nail Trim', 'description' => 'Nail trimming and filing', 'duration' => 15],
-                                            ['id' => 4, 'name' => 'Ear Cleaning', 'description' => 'Ear cleaning and inspection', 'duration' => 15],
-                                            ['id' => 5, 'name' => 'De-shedding Treatment', 'description' => 'Specialized treatment to reduce shedding', 'duration' => 45],
-                                            ['id' => 6, 'name' => 'Puppy Grooming', 'description' => 'Gentle grooming for puppies (under 6 months)', 'duration' => 45],
-                                        ];
-                                        
-                                        // Get selected services from appointment
                                         $selectedServices = json_decode($appointment->services_data ?? '[]', true) ?: [];
                                         $selectedServiceIds = collect($selectedServices)->pluck('id')->toArray();
                                     @endphp
-                                    
                                     @foreach($services as $service)
                                         <div class="border-bottom p-3" style="{{ $loop->last ? 'border-bottom: none !important;' : '' }}">
                                             <div class="row align-items-start">
@@ -146,21 +135,21 @@
                                                     <input class="form-check-input service-checkbox" 
                                                            type="checkbox" 
                                                            name="services[]" 
-                                                           value="{{ $service['id'] }}" 
-                                                           id="service_{{ $service['id'] }}"
-                                                           data-service-id="{{ $service['id'] }}"
-                                                           data-duration="{{ $service['duration'] }}"
-                                                           {{ in_array($service['id'], old('services', $selectedServiceIds)) ? 'checked' : '' }}>
+                                                           value="{{ $service->id }}" 
+                                                           id="service_{{ $service->id }}"
+                                                           data-service-id="{{ $service->id }}"
+                                                           data-duration="{{ $service->duration }}"
+                                                           {{ in_array($service->id, old('services', $selectedServiceIds)) ? 'checked' : '' }}>
                                                 </div>
                                                 <div class="col">
-                                                    <label class="form-check-label fw-bold" for="service_{{ $service['id'] }}">
-                                                        {{ $service['name'] }}
+                                                    <label class="form-check-label fw-bold" for="service_{{ $service->id }}">
+                                                        {{ $service->name }}
                                                     </label>
-                                                    <div class="text-muted small">{{ $service['description'] }}</div>
+                                                    <div class="text-muted small">{{ $service->description }}</div>
                                                 </div>
                                                 <div class="col-3 text-end">
-                                                    <div class="text-primary fw-bold service-price" data-service-id="{{ $service['id'] }}">$0.00</div>
-                                                    <div class="text-info small">{{ $service['duration'] }} min</div>
+                                                    <div class="text-primary fw-bold service-price" data-service-id="{{ $service->id }}">$0.00</div>
+                                                    <div class="text-info small">{{ $service->duration }} min</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -313,14 +302,20 @@
                 if (clientId) {
                     $.get(`/appointments/client/${clientId}/dogs`, function(data) {
                         data.forEach(function(dog) {
-                            dogSelect.append(`<option value="${dog.id}" data-size="${dog.size}">${dog.name} (${dog.breed || 'Unknown breed'})</option>`);
+                            dogSelect.append(`<option value="${dog.id}" data-size="${dog.size || 'medium'}" ${old('dog_id', $appointment->dog_id) == dog.id ? 'selected' : ''}>${dog.name} (${dog.breed || 'Unknown breed'}) - ${dog.size || 'Medium'} size</option>`);
                         });
+                        // If there's an old dog selection, trigger the change event to load prices
+                        if (old('dog_id', $appointment->dog_id)) {
+                            $('#dog_id').trigger('change');
+                        }
+                        updateEndTime();
                     });
                 }
                 
                 // Reset prices when client changes
                 $('.service-price').text('$0.00');
                 calculateTotals();
+                updateEndTime();
             });
 
             // Load service prices when dog is selected
@@ -336,6 +331,7 @@
                 } else {
                     $('.service-price').text('$0.00');
                     calculateTotals();
+                    updateEndTime();
                 }
             });
 
@@ -347,6 +343,7 @@
                         $(`.service-price[data-service-id="${service.service_id}"]`).text('$' + parseFloat(service.price).toFixed(2));
                     });
                     calculateTotals();
+                    updateEndTime();
                 }).fail(function(xhr, status, error) {
                     console.error('Failed to load service prices:', error);
                     console.log('Response:', xhr.responseText);
@@ -388,8 +385,9 @@
                 }
             }
 
-            // Initialize totals if services are pre-selected
+            // Initialize totals
             calculateTotals();
+            updateEndTime();
             
             // Load prices if dog is already selected (for edit form)
             const selectedDog = $('#dog_id option:selected');
@@ -415,6 +413,38 @@
                 console.log('Triggering dog change event');
                 $('#dog_id').trigger('change');
             }
+
+            function updateEndTime() {
+                const startTime = $('#start_time').val();
+                const appointmentDate = $('#appointment_date').val();
+                if (!startTime || !appointmentDate) {
+                    $('#end_time').val('');
+                    return;
+                }
+                // Sum durations of checked services
+                let totalDuration = 0;
+                $('.service-checkbox:checked').each(function() {
+                    const dur = parseInt($(this).data('duration'));
+                    if (!isNaN(dur)) totalDuration += dur;
+                });
+                if (totalDuration === 0) {
+                    $('#end_time').val('');
+                    return;
+                }
+                // Calculate end time
+                const [h, m] = startTime.split(':').map(Number);
+                const start = new Date(appointmentDate + 'T' + startTime);
+                const end = new Date(start.getTime() + totalDuration * 60000);
+                const hh = String(end.getHours()).padStart(2, '0');
+                const mm = String(end.getMinutes()).padStart(2, '0');
+                $('#end_time').val(`${hh}:${mm}`);
+            }
+
+            // Attach events
+            $('.service-checkbox').change(updateEndTime);
+            $('#start_time').change(updateEndTime);
+            // Also call on page load
+            updateEndTime();
         });
     </script>
 @endpush 

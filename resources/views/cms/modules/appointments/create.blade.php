@@ -100,17 +100,6 @@
                                 @enderror
                                 
                                 <div class="border rounded">
-                                    @php
-                                        $services = [
-                                            ['id' => 1, 'name' => 'Basic Grooming', 'description' => 'Bath, brush, nail trim, and basic styling', 'duration' => 60],
-                                            ['id' => 2, 'name' => 'Full Grooming', 'description' => 'Complete grooming including haircut, bath, brush, nail trim, and styling', 'duration' => 90],
-                                            ['id' => 3, 'name' => 'Nail Trim', 'description' => 'Nail trimming and filing', 'duration' => 15],
-                                            ['id' => 4, 'name' => 'Ear Cleaning', 'description' => 'Ear cleaning and inspection', 'duration' => 15],
-                                            ['id' => 5, 'name' => 'De-shedding Treatment', 'description' => 'Specialized treatment to reduce shedding', 'duration' => 45],
-                                            ['id' => 6, 'name' => 'Puppy Grooming', 'description' => 'Gentle grooming for puppies (under 6 months)', 'duration' => 45],
-                                        ];
-                                    @endphp
-                                    
                                     @foreach($services as $service)
                                         <div class="border-bottom p-3" style="{{ $loop->last ? 'border-bottom: none !important;' : '' }}">
                                             <div class="row align-items-start">
@@ -118,21 +107,21 @@
                                                     <input class="form-check-input service-checkbox" 
                                                            type="checkbox" 
                                                            name="services[]" 
-                                                           value="{{ $service['id'] }}" 
-                                                           id="service_{{ $service['id'] }}"
-                                                           data-service-id="{{ $service['id'] }}"
-                                                           data-duration="{{ $service['duration'] }}"
-                                                           {{ in_array($service['id'], old('services', [])) ? 'checked' : '' }}>
+                                                           value="{{ $service->id }}" 
+                                                           id="service_{{ $service->id }}"
+                                                           data-service-id="{{ $service->id }}"
+                                                           data-duration="{{ $service->duration }}"
+                                                           {{ in_array($service->id, old('services', [])) ? 'checked' : '' }}>
                                                 </div>
                                                 <div class="col">
-                                                    <label class="form-check-label fw-bold" for="service_{{ $service['id'] }}">
-                                                        {{ $service['name'] }}
+                                                    <label class="form-check-label fw-bold" for="service_{{ $service->id }}">
+                                                        {{ $service->name }}
                                                     </label>
-                                                    <div class="text-muted small">{{ $service['description'] }}</div>
+                                                    <div class="text-muted small">{{ $service->description }}</div>
                                                 </div>
                                                 <div class="col-3 text-end">
-                                                    <div class="text-primary fw-bold service-price" data-service-id="{{ $service['id'] }}">$0.00</div>
-                                                    <div class="text-info small">{{ $service['duration'] }} min</div>
+                                                    <div class="text-primary fw-bold service-price" data-service-id="{{ $service->id }}">$0.00</div>
+                                                    <div class="text-info small">{{ $service->duration }} min</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -275,6 +264,47 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // Default appointment date to today if not set
+            var $dateInput = $('#appointment_date');
+            if (!$dateInput.val()) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                $dateInput.val(`${yyyy}-${mm}-${dd}`);
+            }
+
+            // Helper: disable/enable fields based on date
+            function toggleFieldsByDate() {
+                const hasDate = !!$dateInput.val();
+                $('#start_time, #end_time, .service-checkbox').prop('disabled', !hasDate);
+                if (!hasDate) {
+                    $('#date-required-msg').show();
+                } else {
+                    $('#date-required-msg').hide();
+                }
+            }
+            // Add helper message if not present
+            if ($('#date-required-msg').length === 0) {
+                $dateInput.after('<div id="date-required-msg" class="text-danger small mt-1" style="display:none;">Please select a date to enable time and services.</div>');
+            }
+            toggleFieldsByDate();
+            $dateInput.on('change', function() {
+                toggleFieldsByDate();
+            });
+
+            // Prevent interaction if date not selected
+            function requireDateAlert(e) {
+                if (!$dateInput.val()) {
+                    alert('Please select an appointment date first.');
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }
+            $('#start_time, #end_time').on('focus', requireDateAlert);
+            $(document).on('mousedown', '.service-checkbox', requireDateAlert);
+
             // Load dogs when client is selected
             $('#client_id').change(function() {
                 loadClientDogs($(this).val());
@@ -309,6 +339,7 @@
                 // Reset pricing when client changes
                 $('.service-price').text('$0.00');
                 calculateTotals();
+                updateEndTime();
             }
 
             // Load service prices when dog is selected
@@ -331,18 +362,13 @@
                         $(`.service-price[data-service-id="${service.service_id}"]`).text('$' + parseFloat(service.price).toFixed(2));
                     });
                     calculateTotals();
+                    updateEndTime();
                 });
             }
 
             // Calculate total price when services are selected
             $('.service-checkbox').change(function() {
                 calculateTotals();
-                updateEndTime();
-            });
-
-            // Update end time when start time changes
-            $('#start_time').change(function() {
-                updateEndTime();
             });
 
             function calculateTotals() {
@@ -378,37 +404,55 @@
             function updateEndTime() {
                 const startTime = $('#start_time').val();
                 const appointmentDate = $('#appointment_date').val();
-                
                 if (!startTime || !appointmentDate) {
+                    console.log('Missing start time or appointment date');
                     $('#end_time').val('');
                     return;
                 }
-
-                // Calculate total duration from selected services
+                // Sum durations of checked services
                 let totalDuration = 0;
                 $('.service-checkbox:checked').each(function() {
-                    totalDuration += parseInt($(this).data('duration'));
+                    const dur = parseInt($(this).data('duration'));
+                    if (!isNaN(dur)) totalDuration += dur;
                 });
-
                 if (totalDuration === 0) {
+                    console.log('No services selected');
                     $('#end_time').val('');
                     return;
                 }
-
-                // Create a Date object from start time and appointment date
-                const startDateTime = new Date(appointmentDate + 'T' + startTime);
-                
-                // Add the total duration in minutes
-                const endDateTime = new Date(startDateTime.getTime() + (totalDuration * 60 * 1000));
-                
-                // Format the end time as HH:MM
-                const endTime = endDateTime.toTimeString().slice(0, 5);
-                
-                $('#end_time').val(endTime);
+                // Calculate end time
+                const [h, m] = startTime.split(':').map(Number);
+                if (isNaN(h) || isNaN(m)) {
+                    console.log('Invalid start time format', startTime);
+                    $('#end_time').val('');
+                    return;
+                }
+                const start = new Date(appointmentDate + 'T' + startTime);
+                if (isNaN(start.getTime())) {
+                    console.log('Invalid start date/time', appointmentDate, startTime);
+                    $('#end_time').val('');
+                    return;
+                }
+                const end = new Date(start.getTime() + totalDuration * 60000);
+                const hh = String(end.getHours()).padStart(2, '0');
+                const mm = String(end.getMinutes()).padStart(2, '0');
+                $('#end_time').val(`${hh}:${mm}`);
+                console.log('End time calculated:', `${hh}:${mm}`);
             }
 
-            // Initialize totals
-            calculateTotals();
+            // Attach events for end time calculation
+            $('.service-checkbox').on('change', function() {
+                calculateTotals();
+                updateEndTime();
+            });
+            $('#start_time').on('change', updateEndTime);
+            $('#dog_id').on('change', function() {
+                setTimeout(updateEndTime, 200); // allow prices/durations to update
+            });
+            $('#appointment_date').on('change', updateEndTime);
+
+            // Also call on page load
+            setTimeout(updateEndTime, 300);
         });
     </script>
 @endpush 
