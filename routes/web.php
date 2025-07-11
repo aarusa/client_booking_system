@@ -12,6 +12,7 @@ use App\Http\Controllers\CMS\ClientController;
 use App\Http\Controllers\CMS\DogController;
 use App\Http\Controllers\CMS\ServiceController;
 use App\Http\Controllers\CMS\AppointmentController;
+use App\Http\Controllers\CMS\ErrorDemoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,7 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard home
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::post('/dashboard/appointments', [DashboardController::class, 'getAppointmentsForDate'])->name('dashboard.appointments');
 
     // Route::resource('users', UserController::class);
     Route::prefix('users')->name('users.')->middleware('auth')->group(function () {
@@ -112,6 +114,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{service}', [ServiceController::class, 'destroy'])->name('destroy')->middleware('permission:delete service');
     });
 
+    // Error demo routes (remove in production)
+    Route::get('error-demo/{type?}', [ErrorDemoController::class, 'demo'])->name('error.demo');
+    
     // Other authenticated user routes
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

@@ -477,6 +477,12 @@ class AppointmentController extends Controller
                     'service_id' => $service->id,
                     'price' => $price->price
                 ];
+            } else {
+                // If no price found, add a default price of 0
+                $prices[] = [
+                    'service_id' => $service->id,
+                    'price' => 0
+                ];
             }
         }
 

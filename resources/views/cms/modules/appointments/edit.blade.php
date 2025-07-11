@@ -50,7 +50,7 @@
                                                         <option value="{{ $dog->id }}" 
                                                                 data-size="{{ $dog->size ?? 'medium' }}"
                                                                 {{ old('dog_id', $appointment->dog_id) == $dog->id ? 'selected' : '' }}>
-                                                            {{ $dog->name }} ({{ $dog->breed ?? 'Unknown breed' }})
+                                                            {{ $dog->name }} ({{ $dog->breed ?? 'Unknown breed' }}) - {{ $dog->size ?? 'Medium' }} size
                                                         </option>
                                                     @endforeach
                                                 @endif
@@ -294,7 +294,19 @@
         // Pass selected dog info from PHP to JS
         var selectedDogId = @json($selectedDogId);
         var selectedDogSize = @json($selectedDogSize);
+        var selectedServiceIds = @json($selectedServiceIds);
+        
         $(document).ready(function() {
+            // Set up CSRF token for AJAX requests
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            
+            // Initialize the page
+            initializePage();
+            
             // Load dogs when client is selected
             $('#client_id').change(function() {
                 const clientId = $(this).val();
@@ -305,10 +317,12 @@
                 if (clientId) {
                     $.get(`/appointments/client/${clientId}/dogs`, function(data) {
                         data.forEach(function(dog) {
-                            dogSelect.append(`<option value="${dog.id}" data-size="${dog.size || 'medium'}" ${old('dog_id', $appointment->dog_id) == dog.id ? 'selected' : ''}>${dog.name} (${dog.breed || 'Unknown breed'}) - ${dog.size || 'Medium'} size</option>`);
+                            const isSelected = dog.id == selectedDogId ? 'selected' : '';
+                            dogSelect.append(`<option value="${dog.id}" data-size="${dog.size || 'medium'}" ${isSelected}>${dog.name} (${dog.breed || 'Unknown breed'}) - ${dog.size || 'Medium'} size</option>`);
                         });
-                        // If there's an old dog selection, trigger the change event to load prices
-                        if (old('dog_id', $appointment->dog_id)) {
+                        
+                        // If there's a selected dog, trigger the change event to load prices
+                        if (selectedDogId) {
                             $('#dog_id').trigger('change');
                         }
                         updateEndTime();
@@ -327,8 +341,6 @@
                 const selectedOption = $(this).find('option:selected');
                 const dogSize = selectedOption.data('size');
                 
-                console.log('Dog changed - ID:', dogId, 'Size:', dogSize);
-                
                 if (dogId && dogSize) {
                     loadServicePrices(dogSize);
                 } else {
@@ -339,27 +351,20 @@
             });
 
             function loadServicePrices(dogSize) {
-                console.log('loadServicePrices called with dogSize:', dogSize);
                 $.get(`/appointments/services/prices/${dogSize}`, function(data) {
-                    console.log('Received pricing data:', data);
                     data.forEach(function(service) {
-                        console.log('Setting price for service', service.service_id, 'to', service.price);
-                        $(`.service-price[data-service-id="${service.service_id}"]`).text('$' + parseFloat(service.price).toFixed(2));
+                        const priceElement = $(`.service-price[data-service-id="${service.service_id}"]`);
+                        if (priceElement.length > 0) {
+                            priceElement.text('$' + parseFloat(service.price).toFixed(2));
+                        }
                     });
-                    // After all prices are set, force a full summary update
+                    // After all prices are set, update totals
                     setTimeout(function() {
-                        // Debug: log checked checkboxes and their prices
-                        $('.service-checkbox:checked').each(function() {
-                            const serviceId = $(this).data('service-id');
-                            const price = $(`.service-price[data-service-id="${serviceId}"]`).text();
-                            console.log('Checked service', serviceId, 'price:', price);
-                        });
                         calculateTotals();
                         updateEndTime();
-                    }, 0);
+                    }, 100);
                 }).fail(function(xhr, status, error) {
                     console.error('Failed to load service prices:', error);
-                    console.log('Response:', xhr.responseText);
                     calculateTotals();
                     updateEndTime();
                 });
@@ -368,6 +373,7 @@
             // Calculate total price when services are selected
             $('.service-checkbox').change(function() {
                 calculateTotals();
+                updateEndTime();
             });
 
             function calculateTotals() {
@@ -400,18 +406,6 @@
                 }
             }
 
-            // Initialize totals
-            calculateTotals();
-            updateEndTime();
-            
-            // On page load, set the dog dropdown and trigger change to load prices and update summary
-            if (selectedDogId) {
-                $('#dog_id').val(selectedDogId).trigger('change');
-            } else {
-                calculateTotals();
-                updateEndTime();
-            }
-
             function updateEndTime() {
                 const startTime = $('#start_time').val();
                 const appointmentDate = $('#appointment_date').val();
@@ -438,11 +432,36 @@
                 $('#end_time').val(`${hh}:${mm}`);
             }
 
+            // Initialize the page
+            function initializePage() {
+                // Set the selected services checkboxes
+                if (selectedServiceIds && selectedServiceIds.length > 0) {
+                    selectedServiceIds.forEach(function(serviceId) {
+                        const checkbox = $(`#service_${serviceId}`);
+                        if (checkbox.length > 0) {
+                            checkbox.prop('checked', true);
+                        }
+                    });
+                }
+                
+                // If we have a selected dog, load prices
+                if (selectedDogId && selectedDogSize) {
+                    // Set the dog dropdown value
+                    $('#dog_id').val(selectedDogId);
+                    
+                    // Load prices for the selected dog size
+                    loadServicePrices(selectedDogSize);
+                }
+                
+                // Calculate initial totals
+                calculateTotals();
+                updateEndTime();
+            }
+
             // Attach events
             $('.service-checkbox').change(updateEndTime);
             $('#start_time').change(updateEndTime);
-            // Also call on page load
-            updateEndTime();
+            $('#appointment_date').change(updateEndTime);
         });
     </script>
 @endpush 

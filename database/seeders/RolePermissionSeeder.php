@@ -16,39 +16,52 @@ class RolePermissionSeeder extends Seeder
      */
     public function run()
     {
-        $roleSuperAdmin = Role::create(['name' => 'Super Admin']);
-        $roleAdmin = Role::create(['name' => 'Admin']);
-        $roleUser = Role::create(['name' => 'User']);
+        $roleSuperAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
+        $roleAdmin = Role::firstOrCreate(['name' => 'Admin']);
 
-        Permission::create(['name' => 'view dashboard']);
+        // Dashboard Widget Permissions
+        Permission::firstOrCreate(['name' => 'view dashboard stats']);
+        Permission::firstOrCreate(['name' => 'view dashboard appointments']);
+        Permission::firstOrCreate(['name' => 'view dashboard business metrics']);
+        Permission::firstOrCreate(['name' => 'view dashboard service revenue']);
+        Permission::firstOrCreate(['name' => 'view dashboard client activity']);
+        Permission::firstOrCreate(['name' => 'view dashboard financial summary']);
+        Permission::firstOrCreate(['name' => 'view dashboard upcoming appointments']);
+        Permission::firstOrCreate(['name' => 'view dashboard dog breeds']);
 
-        Permission::create(['name' => 'view users']);
-        Permission::create(['name' => 'add user']);
-        Permission::create(['name' => 'edit user']);
-        Permission::create(['name' => 'delete user']);
+        Permission::firstOrCreate(['name' => 'view users']);
+        Permission::firstOrCreate(['name' => 'add user']);
+        Permission::firstOrCreate(['name' => 'edit user']);
+        Permission::firstOrCreate(['name' => 'delete user']);
 
-        Permission::create(['name' => 'view roles']);
-        Permission::create(['name' => 'add role']);
-        Permission::create(['name' => 'edit role']);
-        Permission::create(['name' => 'delete role']);
+        Permission::firstOrCreate(['name' => 'view roles']);
+        Permission::firstOrCreate(['name' => 'add role']);
+        Permission::firstOrCreate(['name' => 'edit role']);
+        Permission::firstOrCreate(['name' => 'delete role']);
 
-        Permission::create(['name' => 'view permissions']);
-        Permission::create(['name' => 'add permission']);
-        Permission::create(['name' => 'edit permission']);
-        Permission::create(['name' => 'delete permission']);
-        Permission::create(['name' => 'manage permission']);
+        Permission::firstOrCreate(['name' => 'view permissions']);
+        Permission::firstOrCreate(['name' => 'add permission']);
+        Permission::firstOrCreate(['name' => 'edit permission']);
+        Permission::firstOrCreate(['name' => 'delete permission']);
+        Permission::firstOrCreate(['name' => 'manage permission']);
 
         // Client permissions (now include dog management)
-        Permission::create(['name' => 'view client']);
-        Permission::create(['name' => 'add client']);
-        Permission::create(['name' => 'edit client']);
-        Permission::create(['name' => 'delete client']);
+        Permission::firstOrCreate(['name' => 'view client']);
+        Permission::firstOrCreate(['name' => 'add client']);
+        Permission::firstOrCreate(['name' => 'edit client']);
+        Permission::firstOrCreate(['name' => 'delete client']);
+
+        // Dog Permissions
+        Permission::firstOrCreate(['name' => 'view dog']);
+        Permission::firstOrCreate(['name' => 'add dog']);
+        Permission::firstOrCreate(['name' => 'edit dog']);
+        Permission::firstOrCreate(['name' => 'delete dog']);
 
         // Service Permissions
-        Permission::create(['name' => 'view service']);
-        Permission::create(['name' => 'add service']);
-        Permission::create(['name' => 'edit service']);
-        Permission::create(['name' => 'delete service']);
+        Permission::firstOrCreate(['name' => 'view service']);
+        Permission::firstOrCreate(['name' => 'add service']);
+        Permission::firstOrCreate(['name' => 'edit service']);
+        Permission::firstOrCreate(['name' => 'delete service']);
 
         // Appointment Permissions
         $appointmentPermissions = [
@@ -65,10 +78,16 @@ class RolePermissionSeeder extends Seeder
         // Give all permissions to Super Admin
         $roleSuperAdmin->givePermissionTo(Permission::all());
 
-        // Admin and User permissions as before
-        $roleAdmin->givePermissionTo(['view dashboard', 'view users', 'add user', 'edit user', 'delete user', 'view roles', 'add role', 'edit role', 'delete role', 'view permissions', 'manage permission', 'view client', 'add client', 'edit client', 'delete client', 'view service', 'add service', 'edit service', 'delete service']);
-        $roleUser->givePermissionTo(['view dashboard', 'view users', 'view client', 'view service']);
-
+        // Admin permissions - full access to all dashboard widgets
+        $roleAdmin->givePermissionTo([
+            'view dashboard stats', 'view dashboard appointments', 'view dashboard business metrics', 
+            'view dashboard service revenue', 'view dashboard client activity', 'view dashboard financial summary',
+            'view dashboard upcoming appointments', 'view dashboard dog breeds',
+            'view users', 'add user', 'edit user', 'delete user', 'view roles', 'add role', 'edit role', 'delete role', 
+            'view permissions', 'manage permission', 'view client', 'add client', 'edit client', 'delete client', 
+            'view dog', 'add dog', 'edit dog', 'delete dog', 'view service', 'add service', 'edit service', 'delete service'
+        ]);
+        
         // Assign appointment permissions
         $roleSuperAdmin->givePermissionTo($appointmentPermissions);
         $roleAdmin->givePermissionTo([
@@ -77,10 +96,6 @@ class RolePermissionSeeder extends Seeder
             'appointment-view',
             'appointment-edit',
             'appointment-delete',
-        ]);
-        $roleUser->givePermissionTo([
-            'appointment-access',
-            'appointment-view',
         ]);
     }
 }
