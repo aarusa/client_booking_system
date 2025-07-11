@@ -272,9 +272,9 @@
                                             <td>
                                                 <div class="d-flex flex-column gap-1">
                                                     @can('appointment-view')
-                                                        <a href="{{ route('appointments.show', $appointment->id) }}" class="btn btn-info btn-sm">
+                                                        <button type="button" class="btn btn-info btn-sm view-appointment-btn" data-appointment-id="{{ $appointment->id }}">
                                                             View
-                                                        </a>
+                                                        </button>
                                                     @endcan
                                                     @can('appointment-edit')
                                                         <a href="{{ route('appointments.edit', $appointment->id) }}" class="btn btn-warning btn-sm">Edit</a>
@@ -333,6 +333,18 @@
                             @endif
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {{-- Offcanvas Sidebar for Appointment Details --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="appointmentSidebar" aria-labelledby="appointmentSidebarLabel" style="width: 420px;">
+        <div id="appointmentSidebarContent">
+            <!-- Content will be loaded here -->
+            <div class="d-flex justify-content-center align-items-center h-100">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
         </div>
@@ -650,6 +662,27 @@
                     overlay.classList.remove('active');
                 });
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle view button click
+            document.querySelectorAll('.view-appointment-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var appointmentId = this.getAttribute('data-appointment-id');
+                    var sidebar = new bootstrap.Offcanvas(document.getElementById('appointmentSidebar'));
+                    var content = document.getElementById('appointmentSidebarContent');
+                    content.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+                    sidebar.show();
+                    fetch('/appointments/' + appointmentId + '/sidebar')
+                        .then(response => response.text())
+                        .then(html => {
+                            content.innerHTML = html;
+                        })
+                        .catch(() => {
+                            content.innerHTML = '<div class="alert alert-danger m-3">Failed to load appointment details.</div>';
+                        });
+                });
+            });
         });
     </script>
 @endpush 

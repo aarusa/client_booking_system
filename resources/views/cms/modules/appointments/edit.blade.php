@@ -24,7 +24,7 @@
                                 <div class="col-md-6 col-lg-6">
                                     <div class="form-group">
                                         <label for="client_id">Client</label>
-                                        <select name="client_id" id="client_id" class="form-control @error('client_id') is-invalid @enderror" required>
+                                        <select name="client_id" id="client_id" class="form-control @error('client_id') is-invalid @enderror" required disabled>
                                             <option value="">Select Client</option>
                                             @foreach($clients as $client)
                                                 <option value="{{ $client->id }}" 
@@ -291,6 +291,9 @@
 
 @push('scripts')
     <script>
+        // Pass selected dog info from PHP to JS
+        var selectedDogId = @json($selectedDogId);
+        var selectedDogSize = @json($selectedDogSize);
         $(document).ready(function() {
             // Load dogs when client is selected
             $('#client_id').change(function() {
@@ -340,13 +343,25 @@
                 $.get(`/appointments/services/prices/${dogSize}`, function(data) {
                     console.log('Received pricing data:', data);
                     data.forEach(function(service) {
+                        console.log('Setting price for service', service.service_id, 'to', service.price);
                         $(`.service-price[data-service-id="${service.service_id}"]`).text('$' + parseFloat(service.price).toFixed(2));
                     });
-                    calculateTotals();
-                    updateEndTime();
+                    // After all prices are set, force a full summary update
+                    setTimeout(function() {
+                        // Debug: log checked checkboxes and their prices
+                        $('.service-checkbox:checked').each(function() {
+                            const serviceId = $(this).data('service-id');
+                            const price = $(`.service-price[data-service-id="${serviceId}"]`).text();
+                            console.log('Checked service', serviceId, 'price:', price);
+                        });
+                        calculateTotals();
+                        updateEndTime();
+                    }, 0);
                 }).fail(function(xhr, status, error) {
                     console.error('Failed to load service prices:', error);
                     console.log('Response:', xhr.responseText);
+                    calculateTotals();
+                    updateEndTime();
                 });
             }
 
@@ -389,29 +404,12 @@
             calculateTotals();
             updateEndTime();
             
-            // Load prices if dog is already selected (for edit form)
-            const selectedDog = $('#dog_id option:selected');
-            console.log('Selected dog:', selectedDog.val(), 'Size:', selectedDog.data('size'));
-            
-            // If no size in data attribute, try to get it from the appointment's dog
-            let dogSize = selectedDog.data('size');
-            if (selectedDog.val() && !dogSize) {
-                // Fallback: get size from the appointment's dog (if available in the page)
-                @if($appointment->dog && $appointment->dog->size)
-                    dogSize = '{{ $appointment->dog->size }}';
-                    console.log('Using fallback dog size:', dogSize);
-                @endif
-            }
-            
-            if (selectedDog.val() && dogSize) {
-                console.log('Loading prices for dog size:', dogSize);
-                loadServicePrices(dogSize);
-            }
-            
-            // Also trigger dog change event if dog is pre-selected
-            if (selectedDog.val()) {
-                console.log('Triggering dog change event');
-                $('#dog_id').trigger('change');
+            // On page load, set the dog dropdown and trigger change to load prices and update summary
+            if (selectedDogId) {
+                $('#dog_id').val(selectedDogId).trigger('change');
+            } else {
+                calculateTotals();
+                updateEndTime();
             }
 
             function updateEndTime() {

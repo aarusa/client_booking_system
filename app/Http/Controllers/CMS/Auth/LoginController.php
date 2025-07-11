@@ -37,7 +37,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             // Authentication passed, redirect to dashboard
-            return redirect()->intended('/')->with('success', 'You are logged in!');
+            return redirect()->intended('/');
         }
 
         // Authentication failed

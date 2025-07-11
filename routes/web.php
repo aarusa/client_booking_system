@@ -9,6 +9,7 @@ use App\Http\Controllers\CMS\UserController;
 use App\Http\Controllers\CMS\RoleController;
 use App\Http\Controllers\CMS\PermissionController;
 use App\Http\Controllers\CMS\ClientController;
+use App\Http\Controllers\CMS\DogController;
 use App\Http\Controllers\CMS\ServiceController;
 use App\Http\Controllers\CMS\AppointmentController;
 
@@ -91,6 +92,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy')->middleware('permission:delete client');
     });
 
+    Route::prefix('dogs')->name('dogs.')->middleware('auth')->group(function () {
+        Route::get('/', [DogController::class, 'index'])->name('index')->middleware('permission:view client');
+        Route::get('/create', [DogController::class, 'create'])->name('create')->middleware('permission:add client');
+        Route::post('/', [DogController::class, 'store'])->name('store')->middleware('permission:add client');
+        Route::get('/{dog}', [DogController::class, 'show'])->name('show')->middleware('permission:view client');
+        Route::get('/{dog}/edit', [DogController::class, 'edit'])->name('edit')->middleware('permission:edit client');
+        Route::put('/{dog}', [DogController::class, 'update'])->name('update')->middleware('permission:edit client');
+        Route::delete('/{dog}', [DogController::class, 'destroy'])->name('destroy')->middleware('permission:delete client');
+    });
+
     Route::prefix('services')->name('services.')->middleware('auth')->group(function () {
         Route::get('/', [ServiceController::class, 'index'])->name('index')->middleware('permission:view service');
         Route::get('/create', [ServiceController::class, 'create'])->name('create')->middleware('permission:add service');
@@ -123,5 +134,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/{appointment}/edit', [AppointmentController::class, 'edit'])->name('edit');
         Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('update');
         Route::delete('/{appointment}', [AppointmentController::class, 'destroy'])->name('destroy');
+        Route::get('/{appointment}/sidebar', [AppointmentController::class, 'sidebar'])->name('sidebar');
     });
 });

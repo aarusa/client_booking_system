@@ -7,6 +7,8 @@ use Illuminate\Database\Seeder;
 use App\Models\Appointment;
 use App\Models\Client;
 use App\Models\Dog;
+use App\Models\Service;
+use App\Models\ServicePrice;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
 
@@ -27,59 +29,24 @@ class AppointmentSeeder extends Seeder
             return;
         }
 
-        // Define services with variable pricing based on dog size
-        $services = [
-            1 => ['name' => 'Basic Grooming'],
-            2 => ['name' => 'Full Grooming'],
-            3 => ['name' => 'Nail Trim'],
-            4 => ['name' => 'Ear Cleaning'],
-            5 => ['name' => 'De-shedding Treatment'],
-            6 => ['name' => 'Puppy Grooming'],
-        ];
+        // Fetch all active services with their prices
+        $allServices = Service::where('is_active', true)->with('prices')->get();
+        if ($allServices->isEmpty()) {
+            $this->command->warn('No services found. Please run ServiceSeeder and ServicePriceSeeder first.');
+            return;
+        }
 
-        // Define pricing based on dog size
-        $pricing = [
-            'small' => [
-                1 => 35.00, // Basic Grooming
-                2 => 60.00, // Full Grooming
-                3 => 12.00, // Nail Trim
-                4 => 10.00, // Ear Cleaning
-                5 => 30.00, // De-shedding Treatment
-                6 => 25.00, // Puppy Grooming
-            ],
-            'medium' => [
-                1 => 45.00, // Basic Grooming
-                2 => 75.00, // Full Grooming
-                3 => 15.00, // Nail Trim
-                4 => 12.00, // Ear Cleaning
-                5 => 40.00, // De-shedding Treatment
-                6 => 35.00, // Puppy Grooming
-            ],
-            'large' => [
-                1 => 55.00, // Basic Grooming
-                2 => 90.00, // Full Grooming
-                3 => 18.00, // Nail Trim
-                4 => 15.00, // Ear Cleaning
-                5 => 50.00, // De-shedding Treatment
-                6 => 45.00, // Puppy Grooming
-            ],
-            'extra_large' => [
-                1 => 65.00, // Basic Grooming
-                2 => 110.00, // Full Grooming
-                3 => 20.00, // Nail Trim
-                4 => 18.00, // Ear Cleaning
-                5 => 60.00, // De-shedding Treatment
-                6 => 55.00, // Puppy Grooming
-            ],
-        ];
+        // Generate appointments for the current and previous month only
+        $startDate = Carbon::now()->subMonth()->startOfMonth();
+        $endDate = Carbon::now()->endOfMonth();
 
-        // Appointment statuses with weights for realistic distribution
+        // Appointment statuses with weights for realistic distribution (pro mostly)
         $statuses = [
-            'completed' => 60,    // 60% completed
-            'scheduled' => 20,    // 20% scheduled
-            'confirmed' => 10,    // 10% confirmed
-            'cancelled' => 8,     // 8% cancelled
-            'in_progress' => 2,   // 2% in progress
+            'in_progress' => 45,   // 45% in progress
+            'confirmed' => 35,     // 35% confirmed
+            'scheduled' => 10,     // 10% scheduled
+            'completed' => 8,      // 8% completed
+            'cancelled' => 2,      // 2% cancelled
         ];
 
         // Payment statuses with weights
@@ -99,10 +66,7 @@ class AppointmentSeeder extends Seeder
             'end' => 18,   // 6 PM
         ];
 
-        // Generate appointments for the last 3 months and next 2 months
-        $startDate = Carbon::now()->subMonths(3);
-        $endDate = Carbon::now()->addMonths(2);
-        
+        // Generate appointments
         $appointmentsCreated = 0;
         $maxAppointments = 100; // Limit to prevent too many appointments
 
@@ -130,25 +94,33 @@ class AppointmentSeeder extends Seeder
                 $duration = $faker->randomElement([30, 45, 60, 75, 90, 120]);
                 $endTime = $startTime->copy()->addMinutes($duration);
                 
-                // Select services (1-3 services per appointment)
-                $numServices = $faker->numberBetween(1, 3);
-                $selectedServices = $faker->randomElements(array_keys($services), $numServices);
-                
+                // Select services (1-3 services per appointment) that have a price for the dog's size
+                $dogSize = $dog->size ?? 'medium';
+                $availableServices = $allServices->filter(function($service) use ($dogSize) {
+                    return $service->prices->where('dog_size', $dogSize)->isNotEmpty();
+                })->values();
+                if ($availableServices->isEmpty()) {
+                    continue; // skip if no services for this dog size
+                }
+                $numServices = $faker->numberBetween(1, min(3, $availableServices->count()));
+                $selectedServices = $faker->randomElements($availableServices->all(), $numServices);
                 // Calculate total price based on dog size and selected services
                 $totalPrice = 0;
                 $servicesData = [];
-                $dogSize = $dog->size ?? 'medium';
-                
-                foreach ($selectedServices as $serviceId) {
-                    if (isset($pricing[$dogSize][$serviceId])) {
-                        $price = $pricing[$dogSize][$serviceId];
+                foreach ($selectedServices as $service) {
+                    $priceModel = $service->prices->where('dog_size', $dogSize)->first();
+                    if ($priceModel) {
+                        $price = $priceModel->price;
                         $totalPrice += $price;
                         $servicesData[] = [
-                            'id' => $serviceId,
-                            'name' => $services[$serviceId]['name'],
+                            'id' => $service->id,
+                            'name' => $service->name,
                             'price' => $price
                         ];
                     }
+                }
+                if (empty($servicesData)) {
+                    continue; // skip if no valid services
                 }
                 
                 // Determine status based on date
