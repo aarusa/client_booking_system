@@ -36,9 +36,9 @@ class AppointmentSeeder extends Seeder
             return;
         }
 
-        // Generate appointments for the current and previous month only
-        $startDate = Carbon::now()->subMonth()->startOfMonth();
-        $endDate = Carbon::now()->endOfMonth();
+        // Generate appointments for the current and next week only
+        $startDate = Carbon::now()->startOfWeek(); // Monday this week
+        $endDate = Carbon::now()->addWeek()->endOfWeek(); // Sunday next week
 
         // Appointment statuses with weights for realistic distribution (pro mostly)
         $statuses = [
@@ -123,24 +123,43 @@ class AppointmentSeeder extends Seeder
                     continue; // skip if no valid services
                 }
                 
-                // Determine status based on date
+                // Determine status and payment details based on date
                 $status = 'scheduled';
                 $paymentStatus = 'pending';
                 $amountPaid = 0.00;
                 $paidAt = null;
+                $paymentMode = null;
                 
                 if ($date->isPast()) {
-                    // Past appointments are mostly completed
-                    $status = $faker->randomElement(array_keys($statuses));
+                    // Past appointments can have various statuses and payment details
                     $paymentStatus = $faker->randomElement(array_keys($paymentStatuses));
+                    
+                    // Set status based on payment status
+                    if ($paymentStatus === 'paid' || $paymentStatus === 'refunded') {
+                        $status = 'completed';
+                    } else {
+                        $status = $faker->randomElement(array_keys($statuses));
+                    }
                     
                     if ($paymentStatus === 'paid') {
                         $amountPaid = $totalPrice;
                         $paidAt = $faker->dateTimeBetween($startTime, $startTime->copy()->addDays(7));
+                        $paymentMode = $faker->randomElement($paymentModes);
                     } elseif ($paymentStatus === 'partial') {
                         $amountPaid = $faker->randomFloat(2, $totalPrice * 0.3, $totalPrice * 0.8);
                         $paidAt = $faker->dateTimeBetween($startTime, $startTime->copy()->addDays(7));
+                        $paymentMode = $faker->randomElement($paymentModes);
+                    } else {
+                        // For pending and refunded, amount_paid remains 0.00
+                        $amountPaid = 0.00;
                     }
+                } else {
+                    // Future appointments are scheduled and have no payment details
+                    $status = 'scheduled';
+                    $paymentStatus = 'pending';
+                    $amountPaid = 0.00;
+                    $paidAt = null;
+                    $paymentMode = null;
                 }
                 
                 // Create appointment
@@ -155,7 +174,7 @@ class AppointmentSeeder extends Seeder
                     'services_data' => json_encode($servicesData),
                     'notes' => $faker->optional(0.7)->sentence(),
                     'payment_status' => $paymentStatus,
-                    'payment_mode' => $paymentStatus === 'paid' ? $faker->randomElement($paymentModes) : null,
+                    'payment_mode' => $paymentMode,
                     'amount_paid' => $amountPaid,
                     'paid_at' => $paidAt,
                 ]);

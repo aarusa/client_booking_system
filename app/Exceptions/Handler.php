@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Auth\AuthenticationException;
 
 class Handler extends ExceptionHandler
 {
@@ -49,6 +50,9 @@ class Handler extends ExceptionHandler
 
         // Custom error handling for all exceptions
         $this->renderable(function (Throwable $e, $request) {
+            if ($e instanceof AuthenticationException) {
+                return $this->unauthenticated($request, $e);
+            }
             if ($request->expectsJson()) {
                 return response()->json([
                     'error' => $this->getErrorTitle($e),
@@ -59,6 +63,13 @@ class Handler extends ExceptionHandler
 
             return $this->renderErrorPage($e, $request);
         });
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return $request->expectsJson()
+            ? response()->json(['message' => $exception->getMessage()], 401)
+            : redirect()->guest(route('login'));
     }
 
     /**

@@ -63,6 +63,8 @@
                                     <span class="text-success">Paid</span>
                                 @elseif($appointment->payment_status === 'partial')
                                     <span class="text-warning">Partial</span>
+                                @elseif($appointment->payment_status === 'refunded')
+                                    <span class="text-info">Refunded</span>
                                 @else
                                     <span class="text-danger">Pending</span>
                                 @endif
@@ -76,9 +78,9 @@
                                 </a>
                                 @endcan
                                 @can('appointment-view')
-                                <a href="{{ route('appointments.show', $appointment->id) }}" class="btn btn-outline-info btn-sm" title="View">
+                                <button type="button" class="btn btn-outline-info btn-sm view-appointment-btn" data-appointment-id="{{ $appointment->id }}" title="View">
                                     <i class="fas fa-eye"></i>
-                                </a>
+                                </button>
                                 @endcan
                             </div>
                         </td>

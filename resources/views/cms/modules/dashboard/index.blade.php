@@ -205,6 +205,8 @@
                                                             <span class="text-success">Paid</span>
                                                         @elseif($appointment->payment_status === 'partial')
                                                             <span class="text-warning">Partial</span>
+                                                        @elseif($appointment->payment_status === 'refunded')
+                                                            <span class="text-info">Refunded</span>
                                                         @else
                                                             <span class="text-danger">Pending</span>
                                                         @endif
@@ -218,9 +220,9 @@
                                                         </a>
                                                         @endcan
                                                         @can('appointment-view')
-                                                        <a href="{{ route('appointments.show', $appointment->id) }}" class="btn btn-outline-info btn-sm" title="View">
+                                                        <button type="button" class="btn btn-outline-info btn-sm view-appointment-btn" data-appointment-id="{{ $appointment->id }}" title="View">
                                                             <i class="fas fa-eye"></i>
-                                                        </a>
+                                                        </button>
                                                         @endcan
                                                     </div>
                                                 </td>
@@ -244,7 +246,7 @@
                 @endcan
 
                 <!-- Business Performance & Service Revenue Row -->
-                <div class="row">
+                <!-- <div class="row">
                     @can('view dashboard business metrics')
                     <div class="col-md-6 mb-4">
                         <div class="card card-round h-100">
@@ -348,10 +350,10 @@
                         </div>
                     </div>
                     @endcan
-                </div>
+                </div> -->
 
                 <!-- Most Active Clients -->
-                @can('view dashboard client activity')
+                <!-- @can('view dashboard client activity')
                 <div class="card card-round mb-4">
                     <div class="card-header">
                         <div class="card-head-row">
@@ -442,7 +444,7 @@
                         @endif
                     </div>
                 </div>
-                @endcan
+                @endcan -->
             </div>
 
             <!-- Right Sidebar -->
@@ -486,7 +488,7 @@
 
                 @can('view dashboard upcoming appointments')
                 <!-- Upcoming Appointments -->
-                <div class="card card-round mb-4">
+                <!-- <div class="card card-round mb-4">
                     <div class="card-header">
                         <div class="card-head-row">
                             <div class="card-title">Upcoming Appointments</div>
@@ -559,7 +561,7 @@
                             </div>
                         @endif
                     </div>
-                </div>
+                </div> -->
                 @endcan
 
                 @can('view dashboard dog breeds')
@@ -606,6 +608,18 @@
                     </div>
                 </div>
                 @endcan
+            </div>
+        </div>
+    </div>
+    
+    {{-- Offcanvas Sidebar for Appointment Details --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="appointmentSidebar" aria-labelledby="appointmentSidebarLabel" style="width: 420px;">
+        <div id="appointmentSidebarContent">
+            <!-- Content will be loaded here -->
+            <div class="d-flex justify-content-center align-items-center h-100">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -665,6 +679,29 @@ $(document).ready(function() {
             refreshAppointments(currentDate);
         }
     }, 30000);
+    
+    // Handle view appointment button clicks
+    $(document).on('click', '.view-appointment-btn', function() {
+        var appointmentId = $(this).data('appointment-id');
+        var sidebar = new bootstrap.Offcanvas(document.getElementById('appointmentSidebar'));
+        var content = document.getElementById('appointmentSidebarContent');
+        
+        // Show loading state
+        content.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        
+        // Show sidebar
+        sidebar.show();
+        
+        // Load appointment details
+        fetch('/appointments/' + appointmentId + '/sidebar')
+            .then(response => response.text())
+            .then(html => {
+                content.innerHTML = html;
+            })
+            .catch(() => {
+                content.innerHTML = '<div class="alert alert-danger m-3">Failed to load appointment details.</div>';
+            });
+    });
 });
 
 // Current selected date
