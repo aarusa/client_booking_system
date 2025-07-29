@@ -91,9 +91,9 @@
     </div>
 @else
     <div class="text-center py-4">
-        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-        <h5 class="text-muted">No appointments for {{ $formattedDate }}</h5>
-        <p class="text-muted">All clear for this day!</p>
+        <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+        <small class="mb-1" style="font-size:0.95rem; font-weight:500;">No appointments for {{ $formattedDate ?? '' }}</small>
+        <p class="text-muted" style="font-size:0.9rem; font-weight:400;">All clear for this day!</p>
         @can('appointment-create')
         <a href="{{ route('appointments.create') }}" class="btn btn-primary">Schedule Appointment</a>
         @endcan

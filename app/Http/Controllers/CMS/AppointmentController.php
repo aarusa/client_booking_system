@@ -291,7 +291,8 @@ class AppointmentController extends Controller
             'payment_mode' => 'nullable|in:cash,payid,card,bank_transfer',
             'amount_paid' => 'nullable|numeric|min:0',
             'paid_at' => 'nullable|date',
-        ], [
+        ],
+         [
             'client_id.required' => 'Please select a client.',
             'client_id.exists' => 'Selected client is invalid.',
             'dog_id.required' => 'Please select a dog.',

@@ -20,8 +20,8 @@
             <a href="#">Arusha Shahi</a>
         </div> --}}
         <div>
-            Template by
-            <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.
+            Developed by
+            <a target="_blank" href="https://arusha.com.np">Arusha</a>.
         </div>
     </div>
 </footer>

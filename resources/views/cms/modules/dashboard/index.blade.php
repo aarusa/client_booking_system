@@ -28,78 +28,38 @@
         @can('view dashboard stats')
         <div class="row mb-4">
             <div class="col-sm-6 col-md-3 mb-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-primary bubble-shadow-small">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Total Clients</p>
-                                    <h4 class="card-title">{{ number_format($stats['total_clients']) }}</h4>
-                                </div>
-                            </div>
-                        </div>
+                <div class="simple-widget">
+                    <div class="simple-widget-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <div class="simple-widget-value">{{ number_format($stats['total_clients']) }}</div>
+                        <div class="simple-widget-label">Total Clients</div>
                     </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3 mb-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-success bubble-shadow-small">
-                                    <i class="fas fa-calendar-check"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Today's Appointments</p>
-                                    <h4 class="card-title">{{ $appointmentStats['today'] }}</h4>
-                                </div>
-                            </div>
-                        </div>
+                <div class="simple-widget">
+                    <div class="simple-widget-icon"><i class="fas fa-calendar"></i></div>
+                    <div>
+                        <div class="simple-widget-value">{{ $appointmentStats['today'] }}</div>
+                        <div class="simple-widget-label">Today's Appointments</div>
                     </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3 mb-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-info bubble-shadow-small">
-                                    <i class="fas fa-dollar-sign"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">This Month's Earnings</p>
-                                    <h4 class="card-title">${{ number_format($financialStats['this_month_earnings'], 2) }}</h4>
-                                </div>
-                            </div>
-                        </div>
+                <div class="simple-widget">
+                    <div class="simple-widget-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div>
+                        <div class="simple-widget-value">${{ number_format($financialStats['this_month_earnings'], 2) }}</div>
+                        <div class="simple-widget-label">This Month's Earnings</div>
                     </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3 mb-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big text-center icon-warning bubble-shadow-small">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                            </div>
-                            <div class="col col-stats ms-3 ms-sm-0">
-                                <div class="numbers">
-                                    <p class="card-category">Scheduled Appointments</p>
-                                    <h4 class="card-title">{{ $appointmentStats['scheduled'] }}</h4>
-                                </div>
-                            </div>
-                        </div>
+                <div class="simple-widget">
+                    <div class="simple-widget-icon"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div class="simple-widget-value">{{ $appointmentStats['scheduled'] }}</div>
+                        <div class="simple-widget-label">Scheduled Appointments</div>
                     </div>
                 </div>
             </div>
@@ -790,7 +750,7 @@ function navigateDate(date) {
             window.history.pushState({}, '', url);
             
             // Show success notification
-            showNotification('Appointments updated successfully', 'success');
+            // showNotification('Appointments updated successfully', 'success');
         },
         error: function(xhr, status, error) {
             console.error('Error loading appointments:', error);

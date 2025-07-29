@@ -14,6 +14,11 @@
         
         <form action="{{ route('appointments.store') }}" method="POST">
         @csrf
+        @if ($errors->has('scheduling'))
+            <div class="alert alert-danger">
+                {{ $errors->first('scheduling') }}
+            </div>
+        @endif
         
             <div class="row">
                 <div class="col-md-8">

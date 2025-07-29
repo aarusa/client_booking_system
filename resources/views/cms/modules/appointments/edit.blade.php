@@ -16,6 +16,18 @@
         @csrf
         @method('PUT')
         
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <input type="hidden" name="client_id" value="{{ $appointment->client_id }}">
+        
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">

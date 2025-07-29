@@ -17,13 +17,14 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         // Get current date and calculate date ranges
-        $today = Carbon::today();
+        $timezone = config('app.timezone');
+        $today = Carbon::now($timezone)->startOfDay();
         $thisWeek = Carbon::now()->startOfWeek();
         $thisMonth = Carbon::now()->startOfMonth();
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
 
-        // Always default to today's date for the appointments section
-        $selectedDate = $today;
+        // Use 'date' query parameter if present, otherwise default to today
+        $selectedDate = $request->query('date') ? Carbon::parse($request->query('date')) : $today;
 
         // Basic statistics
         $stats = [
@@ -48,15 +49,11 @@ class DashboardController extends Controller
 
         // Financial statistics
         $financialStats = [
-            'total_earnings' => Appointment::where('status', 'completed')->sum('total_price'),
-            'this_month_earnings' => Appointment::where('status', 'completed')
-                ->whereBetween('appointment_date', [$thisMonth, $today])
-                ->sum('total_price'),
-            'last_month_earnings' => Appointment::where('status', 'completed')
-                ->whereBetween('appointment_date', [$lastMonth, $thisMonth->subDay()])
-                ->sum('total_price'),
+            'total_earnings' => Appointment::sum('total_price'),
+            'this_month_earnings' => Appointment::whereBetween('appointment_date', [$thisMonth, $today])->sum('total_price'),
+            'last_month_earnings' => Appointment::whereBetween('appointment_date', [$lastMonth, $thisMonth->subDay()])->sum('total_price'),
             'pending_payments' => Appointment::where('payment_status', 'pending')->sum('total_price'),
-            'paid_amount' => Appointment::where('payment_status', 'paid')->sum('amount_paid'),
+            'paid_amount' => Appointment::sum('amount_paid'),
         ];
 
         // Recent appointments (upcoming)
